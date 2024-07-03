@@ -166,6 +166,7 @@ dependencies {
 
     implementation(libs.bundles.hilt)
     implementation(libs.material)
+    implementation(project(":screen:time-zone"))
     ksp(libs.hilt.compiler)
 
     implementation(libs.bundles.room)

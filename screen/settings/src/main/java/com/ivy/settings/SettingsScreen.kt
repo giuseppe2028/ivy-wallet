@@ -53,6 +53,7 @@ import com.ivy.navigation.ExchangeRatesScreen
 import com.ivy.navigation.ImportScreen
 import com.ivy.navigation.Navigation
 import com.ivy.navigation.ReleasesScreen
+import com.ivy.navigation.TimeZoneScreen
 import com.ivy.navigation.navigation
 import com.ivy.navigation.screenScopedViewModel
 import com.ivy.ui.R
@@ -295,6 +296,14 @@ private fun BoxWithConstraintsScope.UI(
 //            }
 //
 //            Spacer(Modifier.height(12.dp))
+            SettingsDefaultButton(
+                icon = R.drawable.ic_custom_atom_m,
+                text = "Time-Zone"
+            ) {
+                nav.navigateTo(TimeZoneScreen)
+            }
+
+            Spacer(Modifier.height(12.dp))
 
             SettingsDefaultButton(
                 icon = R.drawable.ic_currency,
