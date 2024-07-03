@@ -92,6 +92,11 @@ data object SettingsScreen : Screen {
         get() = true
 }
 
+data object TimeZoneScreen : Screen {
+    override val isLegacy: Boolean
+        get() = true
+}
+
 data class ImportScreen(
     val launchedFromOnboarding: Boolean
 ) : Screen {
