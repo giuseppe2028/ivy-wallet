@@ -16,6 +16,7 @@ dependencies {
     implementation(projects.temp.oldDesign)
     implementation(projects.widget.balance)
     implementation(libs.androidx.core.i18n)
+    implementation(project(":screen:attributions"))
 
     testImplementation(projects.shared.ui.testing)
 }
