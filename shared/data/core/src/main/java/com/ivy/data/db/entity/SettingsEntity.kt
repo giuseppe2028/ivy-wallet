@@ -28,6 +28,9 @@ data class SettingsEntity(
     @SerialName("isDeleted")
     val isDeleted: Boolean = false,
 
+    @SerialName("periodOffset")
+    val periodOffset: String,
+
     @PrimaryKey
     @SerialName("id")
     @Serializable(with = KSerializerUUID::class)

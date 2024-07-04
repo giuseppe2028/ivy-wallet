@@ -50,6 +50,8 @@ class CurrencyRepositoryImpl @Inject constructor(
                     name = "",
                     isSynced = true,
                     isDeleted = false,
+                    //TODO add the value chosen
+                    periodOffset = "GMT",
                     id = UUID.randomUUID()
                 )
             baseCurrencyMemo = newCurrency
