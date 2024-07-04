@@ -36,7 +36,9 @@ import com.ivy.legacy.utils.setStatusBarDarkTextCompat
 import com.ivy.navigation.ReleasesScreen
 import com.ivy.navigation.TimeZoneScreen
 import com.ivy.navigation.navigation
+import com.ivy.navigation.screenScopedViewModel
 import com.ivy.wallet.ui.theme.components.IvyToolbar
+import kotlinx.collections.immutable.persistentListOf
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -46,6 +48,7 @@ fun BoxWithConstraintsScope.TimeZoneScreen(screen: TimeZoneScreen) {
 
     val ivyContext = ivyWalletCtx()
     val nav = navigation()
+    val viewModel:TimeZoneViewModel = screenScopedViewModel()
     //val uiState = viewModel.uiState()
 
     val view = LocalView.current
@@ -60,19 +63,24 @@ fun BoxWithConstraintsScope.TimeZoneScreen(screen: TimeZoneScreen) {
         }
     }
     UI(
-        screen = screen
+        onSetPeriod = {
+            viewModel.onEvent(TimeZoneEvent.SetPeriod(it))
+        }
     )
 }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod", "LongParameterList")
 @Composable
 private fun BoxWithConstraintsScope.UI(
-    screen: TimeZoneScreen
+    onSetPeriod: (String) -> Unit
 ) {
+//TODO To put on viewModel
 
     val nav = navigation()
 
     val offsetFormatter = DateTimeFormatter.ofPattern("XXX")
+
     val itemsTimeZone = TimeZone.getAvailableIDs().map {
         id ->
         val zone = ZoneId.of(id);
@@ -95,6 +103,7 @@ private fun BoxWithConstraintsScope.UI(
             .navigationBarsPadding()
             .testTag("My_tag")
     ){
+
         stickyHeader {
             IvyToolbar(
                onBack = { nav.onBackPressed() },
@@ -102,6 +111,7 @@ private fun BoxWithConstraintsScope.UI(
                 Spacer(Modifier.weight(1f))
 
                 val rootScreen = rootScreen()
+
                 Text(
                     modifier = Modifier.clickable {
                         nav.navigateTo(ReleasesScreen)
@@ -118,7 +128,7 @@ private fun BoxWithConstraintsScope.UI(
             // onboarding toolbar include paddingBottom 16.dp
         }
         items(itemsTimeZone){
-          item -> SingleTimeZoneElement(item, onItemClick = {})
+          item -> SingleTimeZoneElement(item, onItemClick = {onSetPeriod(item.offsetName)})
         }
     }
 
@@ -126,23 +136,28 @@ private fun BoxWithConstraintsScope.UI(
 @Preview
 @Composable
 private fun BoxWithConstraintsScope.Preview_empty() {
+
     IvyWalletPreview(Theme.LIGHT) {
-       //UI(screen = TimeZoneScreen())
+       UI(onSetPeriod = {})
     }
 }
 
 @Composable
 private fun SingleTimeZoneElement(
     item: TimeZoneState,
-    onItemClick: (TimeZoneState) -> Unit
+    onItemClick: (String) -> Unit
 ){
     Column(
     modifier = Modifier.
         padding(bottom = 12.dp)
-        .clickable { onItemClick(item) }
+        .clickable { onItemClick(item.offsetName) }
     ) {
-        Text(item.name)
-        Text(item.offset + " GMT")
+        Text(
+            item.name,
+            )
+        Text(
+            item.offsetName
+        )
         DividerH()
     }
 }
