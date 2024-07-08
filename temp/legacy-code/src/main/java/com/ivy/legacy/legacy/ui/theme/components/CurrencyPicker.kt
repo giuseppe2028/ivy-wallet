@@ -419,6 +419,4 @@ private fun Preview() {
     }
 }
 
-private data class LetterDivider(
-    val letter: String
-)
+
