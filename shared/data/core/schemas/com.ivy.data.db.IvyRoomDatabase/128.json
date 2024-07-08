@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 128,
-    "identityHash": "177f8030f5202e9229cc552c4dcb9f81",
+    "identityHash": "d5b88cd34254fc115fac9f43729efdae",
     "entities": [
       {
         "tableName": "accounts",
@@ -252,7 +252,7 @@
       },
       {
         "tableName": "settings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`theme` TEXT NOT NULL, `currency` TEXT NOT NULL, `bufferAmount` REAL NOT NULL, `name` TEXT NOT NULL, `isSynced` INTEGER NOT NULL, `isDeleted` INTEGER NOT NULL, `id` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`theme` TEXT NOT NULL, `currency` TEXT NOT NULL, `bufferAmount` REAL NOT NULL, `name` TEXT NOT NULL, `isSynced` INTEGER NOT NULL, `isDeleted` INTEGER NOT NULL, `periodOffset` TEXT NOT NULL, `id` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "theme",
@@ -288,6 +288,12 @@
             "fieldPath": "isDeleted",
             "columnName": "isDeleted",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "periodOffset",
+            "columnName": "periodOffset",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -832,7 +838,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '177f8030f5202e9229cc552c4dcb9f81')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd5b88cd34254fc115fac9f43729efdae')"
     ]
   }
 }
