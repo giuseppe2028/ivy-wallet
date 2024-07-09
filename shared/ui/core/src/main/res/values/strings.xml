@@ -491,4 +491,5 @@
     <string name="bill_paid">Your bill for %1$s %2$s has been paid</string>
     <string name="search_time_zone">Search Time Zone</string>
     <string name="time_zone">Time Zone</string>
+    <string name="set_time_zone">Set Timezone</string>
 </resources>

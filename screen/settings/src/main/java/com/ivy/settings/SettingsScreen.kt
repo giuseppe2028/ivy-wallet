@@ -74,6 +74,7 @@ import com.ivy.wallet.ui.theme.modal.CurrencyModal
 import com.ivy.wallet.ui.theme.modal.DeleteModal
 import com.ivy.wallet.ui.theme.modal.NameModal
 import com.ivy.wallet.ui.theme.modal.ProgressModal
+import com.ivy.wallet.ui.theme.modal.TimeZoneModal
 
 @ExperimentalFoundationApi
 @Composable
@@ -164,6 +165,7 @@ private fun BoxWithConstraintsScope.UI(
 
     ) {
     var currencyModalVisible by remember { mutableStateOf(false) }
+    var timeZoneModalVisible by remember { mutableStateOf(false) }
     var nameModalVisible by remember { mutableStateOf(false) }
     var chooseStartDateOfMonthVisible by remember { mutableStateOf(false) }
     var deleteCloudDataModalVisible by remember { mutableStateOf(false) }
@@ -216,6 +218,12 @@ private fun BoxWithConstraintsScope.UI(
 
             CurrencyButton(currency = currencyCode) {
                 currencyModalVisible = true
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            TimeZoneButton("TimeZone") {
+                timeZoneModalVisible = true
             }
 
             Spacer(Modifier.height(12.dp))
@@ -493,6 +501,12 @@ private fun BoxWithConstraintsScope.UI(
         onSetCurrency(it)
     }
 
+    TimeZoneModal(
+        title = stringResource(R.string.set_time_zone),
+        visible = timeZoneModalVisible,
+        dismiss = { timeZoneModalVisible = false }) {
+
+    }
     NameModal(
         visible = nameModalVisible,
         name = nameLocalAccount ?: "",
@@ -1146,4 +1160,62 @@ fun SettingsUiTest(isDark: Boolean) {
         false -> Theme.LIGHT
     }
     Preview(theme)
+}
+
+
+
+@Composable
+private fun TimeZoneButton(
+    timeZone: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(UI.shapes.r4)
+            .border(2.dp, UI.colors.medium, UI.shapes.r4)
+            .clickable {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(Modifier.width(12.dp))
+
+        IvyIconScaled(
+            icon = R.drawable.ic_currency,
+            iconScale = IconScale.M,
+            padding = 0.dp
+        )
+
+        Spacer(Modifier.width(8.dp))
+
+        Text(
+            modifier = Modifier.padding(vertical = 20.dp),
+            text = stringResource(R.string.set_currency),
+            style = UI.typo.b2.style(
+                color = UI.colors.pureInverse,
+                fontWeight = FontWeight.Bold
+            )
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        Text(
+            text = timeZone,
+            style = UI.typo.b1.style(
+                color = UI.colors.pureInverse,
+                fontWeight = FontWeight.ExtraBold
+            )
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        IvyIconScaled(
+            icon = R.drawable.ic_arrow_right,
+            iconScale = IconScale.M
+        )
+
+        Spacer(Modifier.width(24.dp))
+    }
 }
