@@ -103,15 +103,16 @@ fun TimeZonePicker(
         var preselected by remember {
             mutableStateOf(initialSelectedTimeZone == null)
         }
-       /* var selectedTimeZone by remember {
-            mutableStateOf(initialSelectedTimeZone ?: preselectedCurrency)
-        }*/
+
+        var selectedTimeZone by remember {
+            mutableStateOf(initialSelectedTimeZone ?: preselectedTimeZone)
+        }
 
         var searchTextFieldValue by remember { mutableStateOf(TextFieldValue("")) }
 
         if (!keyboardShown) {
             SelectedTimeZoneCard(
-                timeZone = IvyTimeZoneCustom("Rome","10"),
+                timeZone = selectedTimeZone,
                 preselected = preselected
             )
 
@@ -135,6 +136,7 @@ fun TimeZonePicker(
         ) {
             preselected = false
             //preselectedTimeZone = IvyTimeZoneCustom("id","10")
+            selectedTimeZone = it
             onSelectedTimeZoneChanged(it)
         }
     }
@@ -277,7 +279,7 @@ private fun TimeZoneList(
     searchQueryLowercase: String,
     selectedTimeZone: IvyTimeZoneCustom,
     lastItemSpacer: Dp,
-    onCurrencySelected: (IvyTimeZoneCustom) -> Unit
+    onTimeZoneSelected: (IvyTimeZoneCustom) -> Unit
 ) {
 
        val timeZones =  IvyTimeZoneCustom.timeZones.filter {
@@ -318,12 +320,12 @@ private fun TimeZoneList(
     ) {
         itemsIndexed(timeZonesWithLetters) { index, item ->
             when (item) {
-                is TimeZoneModel -> {
+                is IvyTimeZoneCustom -> {
                     TimeZoneItemCard(
                         timeZone = item,
                         selected = item == selectedTimeZone
                     ) {
-                       // onCurrencySelected(item)
+                        onTimeZoneSelected(item)
                     }
                 }
                 is LetterDivider -> {
@@ -345,7 +347,7 @@ private fun TimeZoneList(
 
 @Composable
 private fun TimeZoneItemCard(
-    timeZone: TimeZoneModel,
+    timeZone: IvyTimeZoneCustom,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
@@ -419,6 +421,7 @@ private fun Preview() {
             initialSelectedTimeZone = null,
             includeKeyboardShownInsetSpacer = true
         ) {
+
         }
     }
 }

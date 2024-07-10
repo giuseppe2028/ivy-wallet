@@ -1192,7 +1192,7 @@ private fun TimeZoneButton(
 
         Text(
             modifier = Modifier.padding(vertical = 20.dp),
-            text = stringResource(R.string.set_currency),
+            text = stringResource(R.string.set_time_zone),
             style = UI.typo.b2.style(
                 color = UI.colors.pureInverse,
                 fontWeight = FontWeight.Bold

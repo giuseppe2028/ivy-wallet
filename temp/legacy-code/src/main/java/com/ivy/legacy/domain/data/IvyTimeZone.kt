@@ -22,7 +22,7 @@ data class IvyTimeZoneCustom(val id:String, val offset:String){
                     id
                 }
 
-                TimeZoneModel(id, name, offsetToday.toString(), offset)
+                IvyTimeZoneCustom(id, offset)
             } catch (e: DateTimeException) {
                 // Log the exception if necessary
                 Log.w("TimeZonePicker", "Unknown time-zone ID: $id", e)
