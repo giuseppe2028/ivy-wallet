@@ -127,7 +127,7 @@ fun TimeZonePicker(
 
         TimeZoneList(
             searchQueryLowercase = searchTextFieldValue.text.toLowerCase(Locale.getDefault()),
-            selectedTimeZone = IvyTimeZoneCustom("Rome","10"),
+            selectedTimeZone = selectedTimeZone,
             lastItemSpacer = if (includeKeyboardShownInsetSpacer) {
                 keyboardShownInsetDp + lastItemSpacer
             } else {
