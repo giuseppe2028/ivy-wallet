@@ -39,13 +39,14 @@ fun BoxWithConstraintsScope.TimeZoneModal(
     dismiss: () -> Unit,
     id: UUID = UUID.randomUUID(),
 
-    onSetCurrency: (String) -> Unit
+    onSetTimeZone: (String) -> Unit
 ) {
-    /*
-    var currency by remember(id) {
-        mutableStateOf(initialCurrency ?: IvyCurrency.getDefault())
+
+    var timeZone by remember(id) {
+        //mutableStateOf(initialCurrency ?: IvyCurrency.getDefault())
+        mutableStateOf("")
     }
-*/
+
     IvyModal(
         id = id,
         visible = visible,
@@ -54,7 +55,7 @@ fun BoxWithConstraintsScope.TimeZoneModal(
             ModalSave(
                 modifier = Modifier.testTag("set_currency_save")
             ) {
-                //onSetCurrency(currency.code)
+                onSetTimeZone(timeZone)
                 dismiss()
             }
         },
@@ -95,7 +96,7 @@ fun BoxWithConstraintsScope.TimeZoneModal(
             onKeyboardShown =  { visible -> keyboardVisible = visible },
             includeKeyboardShownInsetSpacer = false,
             lastItemSpacer = 120.dp,
-            onSelectedTimeZoneChanged = {value->null}
+            onSelectedTimeZoneChanged = {value->timeZone = value.id}
         )
 
     }
@@ -109,8 +110,8 @@ private fun Preview() {
             title = "Set TimeZone",
            // initialCurrency = null,
             visible = true,
-            dismiss = {}
-        ) {
-        }
+            dismiss = {},
+            onSetTimeZone = {}
+        )
     }
 }

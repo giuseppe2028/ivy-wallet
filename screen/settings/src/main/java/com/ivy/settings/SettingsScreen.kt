@@ -133,6 +133,9 @@ fun BoxWithConstraintsScope.SettingsScreen() {
         onDeleteCloudUserData = {
             viewModel.onEvent(SettingsEvent.DeleteCloudUserData)
         },
+        onSetTimeZone = {
+            viewModel.onEvent(SettingsEvent.SetTimeZone(it))
+        }
     )
 }
 
@@ -162,7 +165,7 @@ private fun BoxWithConstraintsScope.UI(
     onSetStartDateOfMonth: (Int) -> Unit = {},
     onDeleteAllUserData: () -> Unit = {},
     onDeleteCloudUserData: () -> Unit = {},
-
+    onSetTimeZone: (String)->Unit
     ) {
     var currencyModalVisible by remember { mutableStateOf(false) }
     var timeZoneModalVisible by remember { mutableStateOf(false) }
@@ -504,8 +507,9 @@ private fun BoxWithConstraintsScope.UI(
     TimeZoneModal(
         title = stringResource(R.string.set_time_zone),
         visible = timeZoneModalVisible,
-        dismiss = { timeZoneModalVisible = false }) {
-
+        dismiss = { timeZoneModalVisible = false }
+    ) {
+        onSetTimeZone(it)
     }
     NameModal(
         visible = nameModalVisible,
@@ -1147,6 +1151,7 @@ private fun Preview(theme: Theme = Theme.LIGHT) {
             lockApp = false,
             currencyCode = "BGN",
             onSetCurrency = {},
+            onSetTimeZone = {}
         )
     }
 }

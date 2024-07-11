@@ -63,6 +63,8 @@ class SettingsViewModel @Inject constructor(
     private val treatTransfersAsIncomeExpense = mutableStateOf(false)
     private val startDateOfMonth = mutableIntStateOf(1)
     private val progressState = mutableStateOf(false)
+    private val timeZone = mutableStateOf("")
+
 
     @Composable
     override fun uiState(): SettingsState {
@@ -80,7 +82,9 @@ class SettingsViewModel @Inject constructor(
             treatTransfersAsIncomeExpense = getTreatTransfersAsIncomeExpense(),
             startDateOfMonth = getStartDateOfMonth(),
             progressState = getProgressState(),
-            hideIncome = getHideIncome()
+            hideIncome = getHideIncome(),
+            //TODO add id timezone
+            idTimeZone = "UE"
         )
     }
 
@@ -218,6 +222,7 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetStartDateOfMonth -> setStartDateOfMonth(event.startDate)
 
+            is SettingsEvent.SetTimeZone -> setTimeZone(event.newTimeZone)
             SettingsEvent.DeleteCloudUserData -> deleteCloudUserData()
             SettingsEvent.DeleteAllUserData -> deleteAllUserData()
         }
@@ -383,4 +388,20 @@ class SettingsViewModel @Inject constructor(
             logoutLogic.logout()
         }
     }
+
+    private fun setTimeZone(newPeriodOffset:String){
+        //save the period on the shared database
+        timeZone.value = newPeriodOffset
+
+        viewModelScope.launch {
+            ioThread {
+                settingsWriter.save(
+                    settingsDao.findFirst().copy(
+                        periodOffset = newPeriodOffset
+                    )
+                )
+            }
+        }
+    }
 }
+

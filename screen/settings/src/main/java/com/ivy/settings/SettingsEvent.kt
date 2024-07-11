@@ -14,7 +14,7 @@ sealed interface SettingsEvent {
     data class SetHideIncome(val hideIncome: Boolean) : SettingsEvent
     data class SetTransfersAsIncomeExpense(val treatTransfersAsIncomeExpense: Boolean) :
         SettingsEvent
-
+    data class SetTimeZone(val newTimeZone:String):SettingsEvent
     data class SetStartDateOfMonth(val startDate: Int) : SettingsEvent
     data object DeleteCloudUserData : SettingsEvent
     data object DeleteAllUserData : SettingsEvent
