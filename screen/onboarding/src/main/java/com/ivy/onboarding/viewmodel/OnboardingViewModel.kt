@@ -10,12 +10,11 @@ import com.ivy.base.legacy.Theme
 import com.ivy.data.db.dao.read.AccountDao
 import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.db.dao.write.WriteSettingsDao
-import com.ivy.ui.ComposeViewModel
+import com.ivy.data.model.Category
+import com.ivy.data.repository.CategoryRepository
 import com.ivy.domain.usecase.exchange.SyncExchangeRatesUseCase
 import com.ivy.legacy.IvyWalletCtx
 import com.ivy.legacy.LogoutLogic
-import com.ivy.data.model.Category
-import com.ivy.data.repository.CategoryRepository
 import com.ivy.legacy.data.model.AccountBalance
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.Settings
@@ -28,6 +27,7 @@ import com.ivy.navigation.OnboardingScreen
 import com.ivy.onboarding.OnboardingDetailState
 import com.ivy.onboarding.OnboardingEvent
 import com.ivy.onboarding.OnboardingState
+import com.ivy.ui.ComposeViewModel
 import com.ivy.wallet.domain.action.account.AccountsAct
 import com.ivy.wallet.domain.data.IvyCurrency
 import com.ivy.wallet.domain.deprecated.logic.CategoryCreator
@@ -135,7 +135,7 @@ class OnboardingViewModel @Inject constructor(
                         baseCurrency = defaultCurrency.code,
                         bufferAmount = 1000.0.toBigDecimal(),
                         //TODO Adjust this part
-                        timeZone = "GMT"
+                        timeZoneOffset = "GMT"
                     ).toEntity()
                 )
             }

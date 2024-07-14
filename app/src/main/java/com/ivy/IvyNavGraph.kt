@@ -40,7 +40,6 @@ import com.ivy.navigation.ReportScreen
 import com.ivy.navigation.Screen
 import com.ivy.navigation.SearchScreen
 import com.ivy.navigation.SettingsScreen
-import com.ivy.navigation.TimeZoneScreen
 import com.ivy.navigation.TransactionsScreen
 import com.ivy.onboarding.OnboardingScreen
 import com.ivy.piechart.PieChartStatisticScreen
@@ -50,7 +49,6 @@ import com.ivy.releases.ReleasesScreenImpl
 import com.ivy.reports.ReportScreen
 import com.ivy.search.SearchScreen
 import com.ivy.settings.SettingsScreen
-import com.ivy.timezone.TimeZoneScreen
 import com.ivy.transaction.EditTransactionScreen
 import com.ivy.transactions.TransactionsScreen
 
@@ -81,7 +79,6 @@ fun BoxWithConstraintsScope.IvyNavGraph(screen: Screen?) {
         is LoanDetailsScreen -> LoanDetailsScreen(screen = screen)
         is SearchScreen -> SearchScreen(screen = screen)
         is CSVScreen -> CSVScreen(screen = screen)
-        is TimeZoneScreen -> TimeZoneScreen(screen = screen)
         FeaturesScreen -> FeaturesScreenImpl()
         AttributionsScreen -> AttributionsScreenImpl()
         ContributorsScreen -> ContributorsScreenImpl()

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.IvyWalletComponentPreview
+import com.ivy.legacy.legacy.ui.theme.components.LetterDivider
 import com.ivy.legacy.utils.addKeyboardListener
 import com.ivy.legacy.utils.densityScope
 import com.ivy.legacy.utils.hideKeyboard

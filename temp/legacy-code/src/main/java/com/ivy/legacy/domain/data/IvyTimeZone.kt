@@ -1,48 +1,59 @@
+package com.ivy.legacy.domain.data
+
 import android.icu.util.TimeZone
-import android.util.Log
-import com.ivy.legacy.utils.timeNowLocal
-import java.time.DateTimeException
-import java.time.LocalDateTime
+import timber.log.Timber
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-data class IvyTimeZoneCustom(val id:String){
-    companion object{
-
-
-        val timeZones = TimeZone.getAvailableIDs().mapNotNull { id ->
-            try {
-
-
-                val tokens = id.replace("_", " ").split("/")
-                val name = if (tokens.size == 2) {
-                    val (country, city) = tokens
-                    "$city ($country)"
-                } else {
-                    id
-                }
-
-                IvyTimeZoneCustom(id)
-            } catch (e: DateTimeException) {
-                // Log the exception if necessary
-                Log.w("TimeZonePicker", "Unknown time-zone ID: $id", e)
-                null // Skip this time zone ID
-            }
-        }
-        fun getDefault(): LocalDateTime {
-            return timeNowLocal();
+/**
+ * [IvyTimeZone]
+ * Represents a supported time zone.
+ *
+ * @param id a [ZoneId] ex: "Asia/Kolkata"
+ * @param offset timeOffset returned via the corresponding id. ex: "+05:30"
+* */
+data class IvyTimeZone(
+    val id: String,
+    val offset: String
+) {
+    companion object {
+        /**
+         * [getSupportedTimeZones]
+         *
+         * uses [ZoneId.getAvailableZoneIds] since [TimeZone.getAvailableIDs] returns short timezone ids which have been deprecated.
+         * @return all supported timezones.
+        * */
+        fun getSupportedTimeZones(): List<IvyTimeZone> = ZoneId.getAvailableZoneIds().mapNotNull { id ->
+            id?.toIvyTimeZone()
         }
 
+        fun getDeviceDefault(): IvyTimeZone =
+            ZoneId.systemDefault().id?.toIvyTimeZone() ?: IvyTimeZone("UTC", "Z")
     }
-    fun getOffset(): String {
-        Log.i("prova","${this.id}")
-        val zone = ZoneId.of(this.id)
-        val offsetFormatter = DateTimeFormatter.ofPattern("XXX")
-        val offsetToday = OffsetDateTime.now(zone).offset
-        val offset = offsetFormatter.format(offsetToday)
-        return offset
-    }
-
 
 }
+
+/**
+ * [String.toIvyTimeZone] should be called only on a possible zoneId string.
+ *
+ * returns: corresponding [IvyTimeZone] or null.
+ * */
+fun String.toIvyTimeZone(): IvyTimeZone? {
+    return kotlin.runCatching {
+        val zone = ZoneId.of(this)
+        val offsetToday = OffsetDateTime.now(zone).offset
+        val offset = DateTimeFormatter.ofPattern("XXX").format(offsetToday)
+        IvyTimeZone(this, offset)
+    }.onFailure {
+        Timber.w("Error for zoneId: $this -> ${it.stackTraceToString()}")
+    }.getOrNull()
+}
+
+
+/**
+ * [String.toIvyTimeZoneOrDefault] should be called only on a possible zoneId string.
+ *
+ * @return corresponding [IvyTimeZone] or device default [IvyTimeZone] if an invalid zoneId string is passed.
+ * */
+fun String.toIvyTimeZoneOrDefault(): IvyTimeZone = this.toIvyTimeZone() ?: IvyTimeZone.getDeviceDefault()

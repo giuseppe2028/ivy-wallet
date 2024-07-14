@@ -1,6 +1,7 @@
 package com.ivy.settings
 
 import com.ivy.domain.RootScreen
+import com.ivy.legacy.domain.data.IvyTimeZone
 
 sealed interface SettingsEvent {
     data class SetCurrency(val newCurrency: String) : SettingsEvent
@@ -14,7 +15,7 @@ sealed interface SettingsEvent {
     data class SetHideIncome(val hideIncome: Boolean) : SettingsEvent
     data class SetTransfersAsIncomeExpense(val treatTransfersAsIncomeExpense: Boolean) :
         SettingsEvent
-    data class SetTimeZone(val newTimeZone:String):SettingsEvent
+    data class SetTimeZone(val newTimeZone:IvyTimeZone):SettingsEvent
     data class SetStartDateOfMonth(val startDate: Int) : SettingsEvent
     data object DeleteCloudUserData : SettingsEvent
     data object DeleteAllUserData : SettingsEvent

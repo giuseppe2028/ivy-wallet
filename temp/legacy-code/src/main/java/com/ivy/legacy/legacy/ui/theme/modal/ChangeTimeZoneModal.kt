@@ -1,8 +1,5 @@
-package com.ivy.wallet.ui.theme.modal
+package com.ivy.legacy.legacy.ui.theme.modal
 
-import IvyTimeZoneCustom
-import TimeZoneModel
-import android.util.Log
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,10 +22,11 @@ import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.design.system.colors.IvyColors.Gray
 import com.ivy.legacy.IvyWalletPreview
-import com.ivy.legacy.R
-import com.ivy.legacy.utils.getDefaultTimeZone
-import com.ivy.wallet.ui.theme.components.CurrencyPicker
-import com.ivy.wallet.ui.theme.components.TimeZonePicker
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.legacy.ui.theme.components.TimeZonePicker
+import com.ivy.wallet.ui.theme.modal.IvyModal
+import com.ivy.wallet.ui.theme.modal.ModalSave
+import com.ivy.wallet.ui.theme.modal.ModalTitle
 import java.util.UUID
 
 
@@ -36,17 +34,16 @@ import java.util.UUID
 @Composable
 fun BoxWithConstraintsScope.TimeZoneModal(
     title: String,
-    //TODO to implement
-    initialTimeZone: String?,
+    initialTimeZone: IvyTimeZone?,
     visible: Boolean,
     dismiss: () -> Unit,
+    onSetTimeZone: (IvyTimeZone) -> Unit,
+    modifier: Modifier = Modifier,
     id: UUID = UUID.randomUUID(),
-
-    onSetTimeZone: (String) -> Unit
 ) {
 
     var timeZone by remember(id) {
-        mutableStateOf(initialTimeZone ?: IvyTimeZoneCustom.getDefault().toString())
+        mutableStateOf(initialTimeZone ?: IvyTimeZone.getDeviceDefault())
     }
 
     IvyModal(
@@ -55,7 +52,7 @@ fun BoxWithConstraintsScope.TimeZoneModal(
         dismiss = dismiss,
         PrimaryAction = {
             ModalSave(
-                modifier = Modifier.testTag("set_currency_save")
+                modifier = Modifier.testTag("set_timezone_save")
             ) {
                 onSetTimeZone(timeZone)
                 dismiss()
@@ -95,11 +92,11 @@ fun BoxWithConstraintsScope.TimeZoneModal(
             modifier = Modifier
                 .weight(1f),
             initialSelectedTimeZone = null,
-            preselectedTimeZone = IvyTimeZoneCustom(getDefaultTimeZone().toString()),
+            preselectedTimeZone = timeZone,
             onKeyboardShown =  { visible -> keyboardVisible = visible },
             includeKeyboardShownInsetSpacer = false,
             lastItemSpacer = 120.dp,
-            onSelectedTimeZoneChanged = {value->timeZone = value.id}
+            onSelectedTimeZoneChanged = {value-> timeZone = value }
         )
 
     }
@@ -111,7 +108,7 @@ private fun Preview() {
     IvyWalletPreview {
         TimeZoneModal(
             title = "Set TimeZone",
-            initialTimeZone = "Africa/Accra",
+            initialTimeZone = IvyTimeZone("Africa/Accra", "+00:00"),
             visible = true,
             dismiss = {},
             onSetTimeZone = {}

@@ -7,7 +7,7 @@ import com.ivy.base.kotlinxserilzation.KSerializerUUID
 import com.ivy.base.legacy.Theme
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.util.*
+import java.util.UUID
 
 @Deprecated("Legacy concept - migrate to DataStore and get rid of it.")
 @Keep
@@ -28,8 +28,8 @@ data class SettingsEntity(
     @SerialName("isDeleted")
     val isDeleted: Boolean = false,
 
-    @SerialName("periodOffset")
-    val periodOffset: String,
+    @SerialName("timeZoneId")
+    val timeZoneId: String?,
 
     @PrimaryKey
     @SerialName("id")

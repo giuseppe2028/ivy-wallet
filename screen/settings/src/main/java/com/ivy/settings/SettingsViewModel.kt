@@ -15,12 +15,13 @@ import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.db.dao.write.WriteSettingsDao
 import com.ivy.data.model.primitive.AssetCode
 import com.ivy.domain.RootScreen
-import com.ivy.domain.usecase.exchange.SyncExchangeRatesUseCase
 import com.ivy.domain.usecase.csv.ExportCsvUseCase
+import com.ivy.domain.usecase.exchange.SyncExchangeRatesUseCase
 import com.ivy.frp.monad.Res
 import com.ivy.legacy.IvyWalletCtx
 import com.ivy.legacy.LogoutLogic
 import com.ivy.legacy.domain.action.settings.UpdateSettingsAct
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.utils.getISOFormattedDateTime
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC
@@ -64,7 +65,7 @@ class SettingsViewModel @Inject constructor(
     private val treatTransfersAsIncomeExpense = mutableStateOf(false)
     private val startDateOfMonth = mutableIntStateOf(1)
     private val progressState = mutableStateOf(false)
-    private val timeZone = mutableStateOf("")
+    private val timeZone = mutableStateOf(IvyTimeZone.getDeviceDefault()) // FIXME: get from db and keep default when not present
 
 
     @Composable
@@ -113,14 +114,13 @@ class SettingsViewModel @Inject constructor(
         val settings = ioThread {
             settingsDao.findFirst()
         }
-        timeZoneCode.value = settings.periodOffset
+        timeZoneCode.value = settings.timeZoneId ?: IvyTimeZone.getDeviceDefault().id
     }
     private suspend fun initializeName() {
         val settings = ioThread {
             settingsDao.findFirst()
         }
-
-        name.value = settings.periodOffset
+        name.value = settings.name
     }
 
     private suspend fun initializeCurrentTheme() {
@@ -401,15 +401,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun setTimeZone(newPeriodOffset:String){
+    private fun setTimeZone(newTimeZone: IvyTimeZone){
         //save the period on the shared database
-        timeZone.value = newPeriodOffset
+        timeZone.value = newTimeZone
 
         viewModelScope.launch {
             ioThread {
                 settingsWriter.save(
                     settingsDao.findFirst().copy(
-                        periodOffset = newPeriodOffset
+                        timeZoneId = newTimeZone.id
                     )
                 )
             }

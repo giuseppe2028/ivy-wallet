@@ -45,6 +45,8 @@ import com.ivy.design.l1_buildingBlocks.IvyIconScaled
 import com.ivy.design.utils.thenIf
 import com.ivy.legacy.Constants
 import com.ivy.legacy.IvyWalletPreview
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.legacy.ui.theme.modal.TimeZoneModal
 import com.ivy.legacy.rootScreen
 import com.ivy.legacy.utils.drawColoredShadow
 import com.ivy.navigation.AttributionsScreen
@@ -53,7 +55,6 @@ import com.ivy.navigation.ExchangeRatesScreen
 import com.ivy.navigation.ImportScreen
 import com.ivy.navigation.Navigation
 import com.ivy.navigation.ReleasesScreen
-import com.ivy.navigation.TimeZoneScreen
 import com.ivy.navigation.navigation
 import com.ivy.navigation.screenScopedViewModel
 import com.ivy.ui.R
@@ -74,7 +75,6 @@ import com.ivy.wallet.ui.theme.modal.CurrencyModal
 import com.ivy.wallet.ui.theme.modal.DeleteModal
 import com.ivy.wallet.ui.theme.modal.NameModal
 import com.ivy.wallet.ui.theme.modal.ProgressModal
-import com.ivy.wallet.ui.theme.modal.TimeZoneModal
 
 @ExperimentalFoundationApi
 @Composable
@@ -167,7 +167,7 @@ private fun BoxWithConstraintsScope.UI(
     onSetStartDateOfMonth: (Int) -> Unit = {},
     onDeleteAllUserData: () -> Unit = {},
     onDeleteCloudUserData: () -> Unit = {},
-    onSetTimeZone: (String)->Unit
+    onSetTimeZone: (IvyTimeZone)->Unit
     ) {
     var currencyModalVisible by remember { mutableStateOf(false) }
     var timeZoneModalVisible by remember { mutableStateOf(false) }
@@ -309,12 +309,6 @@ private fun BoxWithConstraintsScope.UI(
 //            }
 //
 //            Spacer(Modifier.height(12.dp))
-            SettingsDefaultButton(
-                icon = R.drawable.ic_custom_atom_m,
-                text = "Time-Zone"
-            ) {
-                nav.navigateTo(TimeZoneScreen)
-            }
 
             Spacer(Modifier.height(12.dp))
 
@@ -509,12 +503,10 @@ private fun BoxWithConstraintsScope.UI(
     TimeZoneModal(
         title = stringResource(R.string.set_time_zone),
         visible = timeZoneModalVisible,
-        //TODO Modify in a value != null
         initialTimeZone = null,
-        dismiss = { timeZoneModalVisible = false }
-    ) {
-        onSetTimeZone(it)
-    }
+        dismiss = { timeZoneModalVisible = false },
+        onSetTimeZone = { onSetTimeZone(it) }
+    )
     NameModal(
         visible = nameModalVisible,
         name = nameLocalAccount ?: "",

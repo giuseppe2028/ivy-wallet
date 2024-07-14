@@ -1,9 +1,5 @@
-package com.ivy.wallet.ui.theme.components
+package com.ivy.legacy.legacy.ui.theme.components
 
-import IvyTimeZoneCustom
-import TimeZoneModel
-import android.icu.util.TimeZone
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -50,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.IvyWalletComponentPreview
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.utils.addKeyboardListener
 import com.ivy.legacy.utils.densityScope
 import com.ivy.legacy.utils.hideKeyboard
@@ -61,24 +58,21 @@ import com.ivy.wallet.ui.theme.GradientGreen
 import com.ivy.wallet.ui.theme.GradientIvy
 import com.ivy.wallet.ui.theme.Ivy
 import com.ivy.wallet.ui.theme.White
+import com.ivy.wallet.ui.theme.components.IvyIcon
 import com.ivy.wallet.ui.theme.modal.DURATION_MODAL_ANIM
-import java.time.DateTimeException
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
 @Suppress("ParameterNaming")
 @Composable
 fun TimeZonePicker(
-    initialSelectedTimeZone: IvyTimeZoneCustom?,
+    initialSelectedTimeZone: IvyTimeZone?,
     includeKeyboardShownInsetSpacer: Boolean,
+    preselectedTimeZone: IvyTimeZone,
     modifier: Modifier = Modifier,
-    preselectedTimeZone: IvyTimeZoneCustom,
     lastItemSpacer: Dp = 0.dp,
     onKeyboardShown: (keyboardVisible: Boolean) -> Unit = {},
-    onSelectedTimeZoneChanged: (IvyTimeZoneCustom) -> Unit
+    onSelectedTimeZoneChanged: (IvyTimeZone) -> Unit
 ) {
     val rootView = LocalView.current
     var keyboardShown by remember { mutableStateOf(false) }
@@ -135,7 +129,7 @@ fun TimeZonePicker(
             },
         ) {
             preselected = false
-            //preselectedTimeZone = IvyTimeZoneCustom("id","10")
+            //preselectedTimeZone = com.ivy.legacy.domain.data.IvyTimeZone("id","10")
             selectedTimeZone = it
             onSelectedTimeZoneChanged(it)
         }
@@ -217,7 +211,7 @@ private fun SearchInput(
 
 @Composable
 private fun SelectedTimeZoneCard(
-    timeZone: IvyTimeZoneCustom,
+    timeZone: IvyTimeZone,
     preselected: Boolean,
 ) {
     Row(
@@ -246,7 +240,7 @@ private fun SelectedTimeZoneCard(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = timeZone.getOffset(),
+                text = timeZone.offset,
                 style = UI.typo.b1.style(
                     color = White,
                     fontWeight = FontWeight.ExtraBold
@@ -277,16 +271,16 @@ private fun SelectedTimeZoneCard(
 @Suppress("ParameterNaming")
 private fun TimeZoneList(
     searchQueryLowercase: String,
-    selectedTimeZone: IvyTimeZoneCustom,
+    selectedTimeZone: IvyTimeZone,
     lastItemSpacer: Dp,
-    onTimeZoneSelected: (IvyTimeZoneCustom) -> Unit
+    onTimeZoneSelected: (IvyTimeZone) -> Unit
 ) {
 
-       val timeZones =  IvyTimeZoneCustom.timeZones.filter {
+       val timeZones =  IvyTimeZone.getSupportedTimeZones().filter {
             searchQueryLowercase.isBlank() ||
                     it.id.toLowerCaseLocal().startsWith(searchQueryLowercase) ||
                     //TODO take a look about this reseach
-                    it.getOffset().toLowerCaseLocal().startsWith(searchQueryLowercase)
+                    it.offset.toLowerCaseLocal().startsWith(searchQueryLowercase)
         }
         .sortedBy { it.id }
 
@@ -320,7 +314,7 @@ private fun TimeZoneList(
     ) {
         itemsIndexed(timeZonesWithLetters) { index, item ->
             when (item) {
-                is IvyTimeZoneCustom -> {
+                is IvyTimeZone -> {
                     TimeZoneItemCard(
                         timeZone = item,
                         selected = item == selectedTimeZone
@@ -347,48 +341,49 @@ private fun TimeZoneList(
 
 @Composable
 private fun TimeZoneItemCard(
-    timeZone: IvyTimeZoneCustom,
+    timeZone: IvyTimeZone,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    Spacer(Modifier.height(12.dp))
+    Column {
+        Spacer(Modifier.height(12.dp))
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .clip(UI.shapes.r4)
+                .background(
+                    color = if (selected) Ivy else UI.colors.medium,
+                    shape = UI.shapes.r4
+                )
+                .clickable {
+                    onClick()
+                }
+                .padding(vertical = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(Modifier.width(24.dp))
 
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth()
-            .clip(UI.shapes.r4)
-            .background(
-                color = if (selected) Ivy else UI.colors.medium,
-                shape = UI.shapes.r4
+            Text(
+                text = timeZone.id,
+                style = UI.typo.b1.style(
+                    color = if (selected) White else UI.colors.pureInverse,
+                    fontWeight = FontWeight.ExtraBold
+                )
             )
-            .clickable {
-                onClick()
-            }
-            .padding(vertical = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(Modifier.width(24.dp))
 
-        Text(
-            text = timeZone.id,
-            style = UI.typo.b1.style(
-                color = if (selected) White else UI.colors.pureInverse,
-                fontWeight = FontWeight.ExtraBold
+            Spacer(Modifier.weight(1f))
+
+            Text(
+                text = timeZone.offset.take(20),
+                style = UI.typo.b2.style(
+                    color = if (selected) White else UI.colors.pureInverse,
+                    fontWeight = FontWeight.SemiBold
+                )
             )
-        )
 
-        Spacer(Modifier.weight(1f))
-
-        Text(
-            text = timeZone.getOffset().take(20),
-            style = UI.typo.b2.style(
-                color = if (selected) White else UI.colors.pureInverse,
-                fontWeight = FontWeight.SemiBold
-            )
-        )
-
-        Spacer(Modifier.width(32.dp))
+            Spacer(Modifier.width(32.dp))
+        }
     }
 }
 
@@ -397,20 +392,20 @@ private fun LetterDividerItem(
     spacerTop: Dp,
     letterDivider: LetterDivider
 ) {
-    if (spacerTop > 0.dp) {
-        Spacer(Modifier.height(spacerTop))
-    }
-
-    Text(
-        modifier = Modifier.padding(start = 32.dp),
-        text = letterDivider.letter,
-        style = UI.typo.c.style(
-            color = UI.colors.pureInverse,
-            fontWeight = FontWeight.SemiBold
+    Column {
+        if (spacerTop > 0.dp) {
+            Spacer(Modifier.height(spacerTop))
+        }
+        Text(
+            modifier = Modifier.padding(start = 32.dp),
+            text = letterDivider.letter,
+            style = UI.typo.c.style(
+                color = UI.colors.pureInverse,
+                fontWeight = FontWeight.SemiBold
+            )
         )
-    )
-
-    Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(6.dp))
+    }
 }
 
 @Preview
@@ -420,10 +415,8 @@ private fun Preview() {
         TimeZonePicker(
             initialSelectedTimeZone = null,
             includeKeyboardShownInsetSpacer = true,
-            preselectedTimeZone = IvyTimeZoneCustom("Europe/Rome")
-        ) {
-
-        }
+            preselectedTimeZone = IvyTimeZone("Europe/Rome", "+02:00")
+        ) {}
     }
 }
 
