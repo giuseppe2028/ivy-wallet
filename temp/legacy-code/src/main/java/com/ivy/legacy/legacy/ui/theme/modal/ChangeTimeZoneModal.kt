@@ -1,5 +1,6 @@
 package com.ivy.legacy.legacy.ui.theme.modal
 
+import android.util.Log
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -91,7 +92,7 @@ fun BoxWithConstraintsScope.TimeZoneModal(
         TimeZonePicker(
             modifier = Modifier
                 .weight(1f),
-            initialSelectedTimeZone = null,
+            initialSelectedTimeZone = timeZone,
             preselectedTimeZone = timeZone,
             onKeyboardShown =  { visible -> keyboardVisible = visible },
             includeKeyboardShownInsetSpacer = false,
