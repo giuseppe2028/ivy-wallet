@@ -54,6 +54,7 @@ class SettingsViewModel @Inject constructor(
 ) : ComposeViewModel<SettingsState, SettingsEvent>() {
 
     private val currencyCode = mutableStateOf("")
+    private val timeZoneCode = mutableStateOf("")
     private val name = mutableStateOf("")
     private val currentTheme = mutableStateOf<Theme>(Theme.AUTO)
     private val lockApp = mutableStateOf(false)
@@ -73,6 +74,7 @@ class SettingsViewModel @Inject constructor(
         }
 
         return SettingsState(
+            timeZoneCode = getTimezoneCode(),
             currencyCode = getCurrencyCode(),
             name = getName(),
             currentTheme = getCurrentTheme(),
@@ -83,13 +85,12 @@ class SettingsViewModel @Inject constructor(
             startDateOfMonth = getStartDateOfMonth(),
             progressState = getProgressState(),
             hideIncome = getHideIncome(),
-            //TODO add id timezone
-            idTimeZone = "UE"
         )
     }
 
     private suspend fun onStart() {
         initializeCurrency()
+        initializeTimeZone()
         initializeName()
         initializeCurrentTheme()
         initializeLockApp()
@@ -108,12 +109,18 @@ class SettingsViewModel @Inject constructor(
         currencyCode.value = settings.currency
     }
 
+    private suspend fun initializeTimeZone() {
+        val settings = ioThread {
+            settingsDao.findFirst()
+        }
+        timeZoneCode.value = settings.periodOffset
+    }
     private suspend fun initializeName() {
         val settings = ioThread {
             settingsDao.findFirst()
         }
 
-        name.value = settings.name
+        name.value = settings.periodOffset
     }
 
     private suspend fun initializeCurrentTheme() {
@@ -152,6 +159,11 @@ class SettingsViewModel @Inject constructor(
     @Composable
     private fun getCurrencyCode(): String {
         return currencyCode.value
+    }
+
+    @Composable
+    private fun getTimezoneCode(): String {
+        return timeZoneCode.value
     }
 
     @Composable

@@ -1,6 +1,5 @@
 package com.ivy.legacy.utils
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.ivy.base.legacy.stringRes
@@ -15,22 +14,20 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-fun timeNowLocal(): LocalDateTime  {
-    Log.i("Prova","LocalDateTime.now(): ${LocalDateTime.now()}" )
-    return LocalDateTime.now(ZoneOffset.systemDefault())
-}
+fun timeNowLocal(zone:ZoneId = ZoneOffset.systemDefault()): LocalDateTime = LocalDateTime.now(zone)
 
 fun dateNowLocal(): LocalDate = LocalDate.now()
 
-@Total
-fun timeNowUTC(): LocalDateTime {
-    Log.i("Prova","ZoneOffset.UTC: ${ZoneOffset.UTC}" )
-    Log.i("Prova","ZoneOffset.systemDefault(): ${ZoneOffset.systemDefault()}" )
-    Log.i("Prova","ZoneOffset.UTC.id: ${ZoneOffset.UTC.id}" )
-    Log.i("Prova","ZoneOffset.systemDefault().id: ${ZoneOffset.systemDefault().id}" )
-    Log.i("Prova","ZoneOffset: ${LocalDateTime.now(ZoneId.of("America/New_York"))}" )
-    return LocalDateTime.now(ZoneId.of("America/New_York"))
+fun getDefaultTimeZone(): ZoneId = ZoneOffset.systemDefault()
+
+fun offesetFormatted(
+
+){
+
 }
+
+@Total
+fun timeNowUTC(): LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
 
 @Total
 fun timeUTC(): LocalTime = LocalTime.now(ZoneOffset.UTC)

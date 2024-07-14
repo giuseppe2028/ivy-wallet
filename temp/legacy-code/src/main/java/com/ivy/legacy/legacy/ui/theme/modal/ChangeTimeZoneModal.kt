@@ -1,6 +1,8 @@
 package com.ivy.wallet.ui.theme.modal
 
 import IvyTimeZoneCustom
+import TimeZoneModel
+import android.util.Log
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +26,7 @@ import com.ivy.design.l0_system.style
 import com.ivy.design.system.colors.IvyColors.Gray
 import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.R
+import com.ivy.legacy.utils.getDefaultTimeZone
 import com.ivy.wallet.ui.theme.components.CurrencyPicker
 import com.ivy.wallet.ui.theme.components.TimeZonePicker
 import java.util.UUID
@@ -34,7 +37,7 @@ import java.util.UUID
 fun BoxWithConstraintsScope.TimeZoneModal(
     title: String,
     //TODO to implement
-    //initialCurrency: IvyCurrency?,
+    initialTimeZone: String?,
     visible: Boolean,
     dismiss: () -> Unit,
     id: UUID = UUID.randomUUID(),
@@ -43,8 +46,7 @@ fun BoxWithConstraintsScope.TimeZoneModal(
 ) {
 
     var timeZone by remember(id) {
-        //mutableStateOf(initialCurrency ?: IvyCurrency.getDefault())
-        mutableStateOf("")
+        mutableStateOf(initialTimeZone ?: IvyTimeZoneCustom.getDefault().toString())
     }
 
     IvyModal(
@@ -93,6 +95,7 @@ fun BoxWithConstraintsScope.TimeZoneModal(
             modifier = Modifier
                 .weight(1f),
             initialSelectedTimeZone = null,
+            preselectedTimeZone = IvyTimeZoneCustom(getDefaultTimeZone().toString()),
             onKeyboardShown =  { visible -> keyboardVisible = visible },
             includeKeyboardShownInsetSpacer = false,
             lastItemSpacer = 120.dp,
@@ -108,7 +111,7 @@ private fun Preview() {
     IvyWalletPreview {
         TimeZoneModal(
             title = "Set TimeZone",
-           // initialCurrency = null,
+            initialTimeZone = "Africa/Accra",
             visible = true,
             dismiss = {},
             onSetTimeZone = {}

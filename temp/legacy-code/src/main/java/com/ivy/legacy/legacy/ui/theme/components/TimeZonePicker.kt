@@ -75,7 +75,7 @@ fun TimeZonePicker(
     initialSelectedTimeZone: IvyTimeZoneCustom?,
     includeKeyboardShownInsetSpacer: Boolean,
     modifier: Modifier = Modifier,
-    preselectedTimeZone: IvyTimeZoneCustom = IvyTimeZoneCustom("Europe/Rome", "+02:00"),
+    preselectedTimeZone: IvyTimeZoneCustom,
     lastItemSpacer: Dp = 0.dp,
     onKeyboardShown: (keyboardVisible: Boolean) -> Unit = {},
     onSelectedTimeZoneChanged: (IvyTimeZoneCustom) -> Unit
@@ -246,7 +246,7 @@ private fun SelectedTimeZoneCard(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = timeZone.offset,
+                text = timeZone.getOffset(),
                 style = UI.typo.b1.style(
                     color = White,
                     fontWeight = FontWeight.ExtraBold
@@ -286,7 +286,7 @@ private fun TimeZoneList(
             searchQueryLowercase.isBlank() ||
                     it.id.toLowerCaseLocal().startsWith(searchQueryLowercase) ||
                     //TODO take a look about this reseach
-                    it.offset.toLowerCaseLocal().startsWith(searchQueryLowercase)
+                    it.getOffset().toLowerCaseLocal().startsWith(searchQueryLowercase)
         }
         .sortedBy { it.id }
 
@@ -381,7 +381,7 @@ private fun TimeZoneItemCard(
         Spacer(Modifier.weight(1f))
 
         Text(
-            text = timeZone.offset.take(20),
+            text = timeZone.getOffset().take(20),
             style = UI.typo.b2.style(
                 color = if (selected) White else UI.colors.pureInverse,
                 fontWeight = FontWeight.SemiBold
@@ -419,7 +419,8 @@ private fun Preview() {
     IvyWalletComponentPreview {
         TimeZonePicker(
             initialSelectedTimeZone = null,
-            includeKeyboardShownInsetSpacer = true
+            includeKeyboardShownInsetSpacer = true,
+            preselectedTimeZone = IvyTimeZoneCustom("Europe/Rome")
         ) {
 
         }

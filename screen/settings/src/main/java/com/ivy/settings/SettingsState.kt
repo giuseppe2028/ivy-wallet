@@ -3,6 +3,7 @@ package com.ivy.settings
 import com.ivy.base.legacy.Theme
 
 data class SettingsState(
+    val timeZoneCode:String,
     val currencyCode: String,
     val name: String,
     val currentTheme: Theme,
@@ -13,5 +14,4 @@ data class SettingsState(
     val treatTransfersAsIncomeExpense: Boolean,
     val startDateOfMonth: String,
     val progressState: Boolean,
-    val idTimeZone:String
 )

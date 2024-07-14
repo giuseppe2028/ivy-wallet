@@ -85,6 +85,7 @@ fun BoxWithConstraintsScope.SettingsScreen() {
 
     UI(
         currencyCode = uiState.currencyCode,
+        timeZoneCode = uiState.timeZoneCode,
         theme = uiState.currentTheme,
         onSwitchTheme = {
             viewModel.onEvent(SettingsEvent.SwitchTheme)
@@ -143,6 +144,7 @@ fun BoxWithConstraintsScope.SettingsScreen() {
 @Composable
 private fun BoxWithConstraintsScope.UI(
     currencyCode: String,
+    timeZoneCode:String,
     theme: Theme,
     onSwitchTheme: () -> Unit,
     lockApp: Boolean,
@@ -225,7 +227,7 @@ private fun BoxWithConstraintsScope.UI(
 
             Spacer(Modifier.height(12.dp))
 
-            TimeZoneButton("TimeZone") {
+            TimeZoneButton(timeZone = timeZoneCode) {
                 timeZoneModalVisible = true
             }
 
@@ -507,6 +509,8 @@ private fun BoxWithConstraintsScope.UI(
     TimeZoneModal(
         title = stringResource(R.string.set_time_zone),
         visible = timeZoneModalVisible,
+        //TODO Modify in a value != null
+        initialTimeZone = null,
         dismiss = { timeZoneModalVisible = false }
     ) {
         onSetTimeZone(it)
@@ -1145,6 +1149,7 @@ private fun SettingsDefaultButton(
 private fun Preview(theme: Theme = Theme.LIGHT) {
     IvyWalletPreview(theme) {
         UI(
+            timeZoneCode = "Europe/Sofia",
             nameLocalAccount = null,
             theme = Theme.AUTO,
             onSwitchTheme = {},
