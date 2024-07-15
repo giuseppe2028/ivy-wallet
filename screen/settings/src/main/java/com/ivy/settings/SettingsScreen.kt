@@ -1,5 +1,6 @@
 package com.ivy.settings
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -500,14 +501,14 @@ private fun BoxWithConstraintsScope.UI(
     ) {
         onSetCurrency(it)
     }
-
     TimeZoneModal(
         title = stringResource(R.string.set_time_zone),
         visible = timeZoneModalVisible,
         initialTimeZone = timeZoneCode.toIvyTimeZone(),
         dismiss = { timeZoneModalVisible = false },
-        onSetTimeZone = { onSetTimeZone(it) }
-    )
+    ){
+        onSetTimeZone(it)
+    }
     NameModal(
         visible = nameModalVisible,
         name = nameLocalAccount ?: "",

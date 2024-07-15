@@ -38,9 +38,10 @@ fun BoxWithConstraintsScope.TimeZoneModal(
     initialTimeZone: IvyTimeZone?,
     visible: Boolean,
     dismiss: () -> Unit,
-    onSetTimeZone: (IvyTimeZone) -> Unit,
+
     modifier: Modifier = Modifier,
     id: UUID = UUID.randomUUID(),
+    onSetTimeZone: (IvyTimeZone) -> Unit
 ) {
 
     var timeZone by remember(id) {
