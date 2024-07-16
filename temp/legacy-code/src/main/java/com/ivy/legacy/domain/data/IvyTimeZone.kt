@@ -37,7 +37,7 @@ data class IvyTimeZone(
 /**
  * [String.toIvyTimeZone] should be called only on a possible zoneId string.
  *
- * returns: corresponding [IvyTimeZone] or null.
+ * @return corresponding [IvyTimeZone] or null.
  * */
 fun String.toIvyTimeZone(): IvyTimeZone? {
     return kotlin.runCatching {
@@ -46,7 +46,7 @@ fun String.toIvyTimeZone(): IvyTimeZone? {
         val offset = DateTimeFormatter.ofPattern("XXX").format(offsetToday)
         IvyTimeZone(this, offset)
     }.onFailure {
-        Timber.w("Error for zoneId: $this -> ${it.stackTraceToString()}")
+        Timber.w("Error for zoneId: \"$this\" -> ${it.stackTraceToString()}")
     }.getOrNull()
 }
 
@@ -56,4 +56,4 @@ fun String.toIvyTimeZone(): IvyTimeZone? {
  *
  * @return corresponding [IvyTimeZone] or device default [IvyTimeZone] if an invalid zoneId string is passed.
  * */
-fun String.toIvyTimeZoneOrDefault(): IvyTimeZone = this.toIvyTimeZone() ?: IvyTimeZone.getDeviceDefault()
+fun String?.toIvyTimeZoneOrDefault(): IvyTimeZone = this?.toIvyTimeZone() ?: IvyTimeZone.getDeviceDefault()

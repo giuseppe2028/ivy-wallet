@@ -22,6 +22,7 @@ import com.ivy.legacy.IvyWalletCtx
 import com.ivy.legacy.LogoutLogic
 import com.ivy.legacy.domain.action.settings.UpdateSettingsAct
 import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.getISOFormattedDateTime
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC
@@ -55,7 +56,6 @@ class SettingsViewModel @Inject constructor(
 ) : ComposeViewModel<SettingsState, SettingsEvent>() {
 
     private val currencyCode = mutableStateOf("")
-    private val timeZoneCode = mutableStateOf("")
     private val name = mutableStateOf("")
     private val currentTheme = mutableStateOf<Theme>(Theme.AUTO)
     private val lockApp = mutableStateOf(false)
@@ -65,7 +65,7 @@ class SettingsViewModel @Inject constructor(
     private val treatTransfersAsIncomeExpense = mutableStateOf(false)
     private val startDateOfMonth = mutableIntStateOf(1)
     private val progressState = mutableStateOf(false)
-    private val timeZone = mutableStateOf(IvyTimeZone.getDeviceDefault()) // FIXME: get from db and keep default when not present
+    private val timeZone = mutableStateOf(IvyTimeZone.getDeviceDefault())
 
 
     @Composable
@@ -114,7 +114,7 @@ class SettingsViewModel @Inject constructor(
         val settings = ioThread {
             settingsDao.findFirst()
         }
-        timeZoneCode.value = settings.timeZoneId ?: IvyTimeZone.getDeviceDefault().id
+        timeZone.value = settings.timeZoneId.toIvyTimeZoneOrDefault()
     }
     private suspend fun initializeName() {
         val settings = ioThread {
@@ -163,7 +163,7 @@ class SettingsViewModel @Inject constructor(
 
     @Composable
     private fun getTimezoneCode(): String {
-        return timeZoneCode.value
+        return timeZone.value.id
     }
 
     @Composable
