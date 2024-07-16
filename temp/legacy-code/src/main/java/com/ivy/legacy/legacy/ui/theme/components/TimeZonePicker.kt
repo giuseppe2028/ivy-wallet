@@ -1,5 +1,6 @@
 package com.ivy.legacy.legacy.ui.theme.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,15 +46,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import com.ivy.design.l0_system.Green
 import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.IvyWalletComponentPreview
 import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.utils.addKeyboardListener
+import com.ivy.legacy.utils.clickableNoIndication
+import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.densityScope
 import com.ivy.legacy.utils.hideKeyboard
 import com.ivy.legacy.utils.keyboardOnlyWindowInsets
 import com.ivy.legacy.utils.onScreenStart
+import com.ivy.legacy.utils.rememberInteractionSource
 import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.ui.R
 import com.ivy.wallet.ui.theme.GradientGreen
@@ -60,6 +68,7 @@ import com.ivy.wallet.ui.theme.Ivy
 import com.ivy.wallet.ui.theme.White
 import com.ivy.wallet.ui.theme.components.IvyIcon
 import com.ivy.wallet.ui.theme.modal.DURATION_MODAL_ANIM
+import com.ivy.wallet.ui.theme.pureBlur
 import java.util.Locale
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
@@ -275,31 +284,31 @@ private fun TimeZoneList(
     lastItemSpacer: Dp,
     onTimeZoneSelected: (IvyTimeZone) -> Unit
 ) {
+    // even though this is not a recommended practice for this project but this use case is too
+    // small and fixed to use sealed interface/class
+    var isLoading by remember { mutableStateOf(true) }
 
-       val timeZones =  IvyTimeZone.getSupportedTimeZones().filter {
+    var allSupportedTimeZones by remember { mutableStateOf(listOf<IvyTimeZone>()) }
+    var timeZonesWithLetterDividers by remember { mutableStateOf(listOf<Any>()) }
+
+    LaunchedEffect(Unit) {
+        // loading timeZones on the uiThread was causing massive lags
+        computationThread {
+            allSupportedTimeZones = IvyTimeZone.getSupportedTimeZones()
+            isLoading = false
+        }
+    }
+
+    LaunchedEffect(searchQueryLowercase, allSupportedTimeZones) {
+        // filter with searchQuery for available timeZones
+        val timeZonesToShow = allSupportedTimeZones.filter {
             searchQueryLowercase.isBlank() ||
                     it.id.toLowerCaseLocal().startsWith(searchQueryLowercase) ||
                     //TODO take a look about this reseach
                     it.offset.toLowerCaseLocal().startsWith(searchQueryLowercase)
-        }
-        .sortedBy { it.id }
+        }.sortedBy { it.id }
 
-    val timeZonesWithLetters = mutableListOf<Any>()
-
-    var lastFirstLetter: String? = null
-    for (timeZone in timeZones) {
-        val firstLetter =  timeZone.id.first().toString()
-        if (firstLetter != lastFirstLetter) {
-            timeZonesWithLetters.add(
-                //TODO review the access of letterDevider
-                LetterDivider(
-                    letter = firstLetter
-                )
-            )
-            lastFirstLetter = firstLetter
-        }
-
-        timeZonesWithLetters.add(timeZone)
+        timeZonesWithLetterDividers = getTimeZonesWithLetterDividers(timeZonesToShow)
     }
 
     val listState = remember(searchQueryLowercase, selectedTimeZone) {
@@ -309,10 +318,29 @@ private fun TimeZoneList(
         )
     }
 
+    AnimatedVisibility(isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(1000f)
+                .background(pureBlur())
+                .clickableNoIndication(rememberInteractionSource()) { /*consume clicks*/ },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.loading),
+                style = UI.typo.b1.style(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Green
+                )
+            )
+        }
+    }
+
     LazyColumn(
         state = listState
     ) {
-        itemsIndexed(timeZonesWithLetters) { index, item ->
+        itemsIndexed(timeZonesWithLetterDividers) { index, item ->
             when (item) {
                 is IvyTimeZone -> {
                     TimeZoneItemCard(
@@ -418,6 +446,27 @@ private fun Preview() {
             preselectedTimeZone = IvyTimeZone("Europe/Rome", "+02:00")
         ) {}
     }
+}
+
+// should return a combined list of [IvyTimeZone] and [LetterDivider]
+private fun getTimeZonesWithLetterDividers(timeZones: List<IvyTimeZone>): List<Any> {
+    val timeZonesWithLetters = mutableListOf<Any>()
+    var lastFirstLetter: String? = null
+    for (timeZone in timeZones) {
+        val firstLetter =  timeZone.id.first().toString()
+        if (firstLetter != lastFirstLetter) {
+            timeZonesWithLetters.add(
+                //TODO review the access of letterDevider
+                LetterDivider(
+                    letter = firstLetter
+                )
+            )
+            lastFirstLetter = firstLetter
+        }
+
+        timeZonesWithLetters.add(timeZone)
+    }
+    return timeZonesWithLetters
 }
 
 data class LetterDivider(
