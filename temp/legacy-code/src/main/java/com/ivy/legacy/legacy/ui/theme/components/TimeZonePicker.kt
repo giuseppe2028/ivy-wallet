@@ -60,7 +60,6 @@ import com.ivy.legacy.utils.hideKeyboard
 import com.ivy.legacy.utils.keyboardOnlyWindowInsets
 import com.ivy.legacy.utils.onScreenStart
 import com.ivy.legacy.utils.rememberInteractionSource
-import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.ui.R
 import com.ivy.wallet.ui.theme.GradientGreen
 import com.ivy.wallet.ui.theme.GradientIvy
@@ -69,7 +68,6 @@ import com.ivy.wallet.ui.theme.White
 import com.ivy.wallet.ui.theme.components.IvyIcon
 import com.ivy.wallet.ui.theme.modal.DURATION_MODAL_ANIM
 import com.ivy.wallet.ui.theme.pureBlur
-import java.util.Locale
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
 @Suppress("ParameterNaming")
@@ -129,7 +127,7 @@ fun TimeZonePicker(
         Spacer(Modifier.height(20.dp))
 
         TimeZoneList(
-            searchQueryLowercase = searchTextFieldValue.text.toLowerCase(Locale.getDefault()),
+            searchQuery = searchTextFieldValue.text,
             selectedTimeZone = selectedTimeZone,
             lastItemSpacer = if (includeKeyboardShownInsetSpacer) {
                 keyboardShownInsetDp + lastItemSpacer
@@ -279,7 +277,7 @@ private fun SelectedTimeZoneCard(
 @Composable
 @Suppress("ParameterNaming")
 private fun TimeZoneList(
-    searchQueryLowercase: String,
+    searchQuery: String,
     selectedTimeZone: IvyTimeZone,
     lastItemSpacer: Dp,
     onTimeZoneSelected: (IvyTimeZone) -> Unit
@@ -299,19 +297,18 @@ private fun TimeZoneList(
         }
     }
 
-    LaunchedEffect(searchQueryLowercase, allSupportedTimeZones) {
+    LaunchedEffect(searchQuery, allSupportedTimeZones) {
         // filter with searchQuery for available timeZones
         val timeZonesToShow = allSupportedTimeZones.filter {
-            searchQueryLowercase.isBlank() ||
-                    it.id.toLowerCaseLocal().startsWith(searchQueryLowercase) ||
-                    //TODO take a look about this reseach
-                    it.offset.toLowerCaseLocal().startsWith(searchQueryLowercase)
+            searchQuery.isBlank() ||
+                    it.id.contains(searchQuery, ignoreCase = true) ||
+                    it.offset.contains(searchQuery, ignoreCase = true)
         }.sortedBy { it.id }
 
         timeZonesWithLetterDividers = getTimeZonesWithLetterDividers(timeZonesToShow)
     }
 
-    val listState = remember(searchQueryLowercase, selectedTimeZone) {
+    val listState = remember(searchQuery, selectedTimeZone) {
         LazyListState(
             firstVisibleItemIndex = 0,
             firstVisibleItemScrollOffset = 0
