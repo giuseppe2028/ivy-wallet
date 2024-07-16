@@ -43,6 +43,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -52,6 +53,7 @@ import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.IvyWalletComponentPreview
 import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.addKeyboardListener
 import com.ivy.legacy.utils.clickableNoIndication
 import com.ivy.legacy.utils.computationThread
@@ -394,11 +396,11 @@ private fun TimeZoneItemCard(
                 style = UI.typo.b1.style(
                     color = if (selected) White else UI.colors.pureInverse,
                     fontWeight = FontWeight.ExtraBold
-                )
+                ),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                modifier = Modifier.weight(1.0f).padding(end = 4.dp)
             )
-
-            Spacer(Modifier.weight(1f))
-
             Text(
                 text = timeZone.offset.take(20),
                 style = UI.typo.b2.style(
@@ -440,8 +442,20 @@ private fun Preview() {
         TimeZonePicker(
             initialSelectedTimeZone = null,
             includeKeyboardShownInsetSpacer = true,
-            preselectedTimeZone = IvyTimeZone("Europe/Rome", "+02:00")
+            preselectedTimeZone = IvyTimeZone("Europe/Rome","+02:00")
         ) {}
+    }
+}
+
+@Preview()
+@Composable
+private fun TimeZoneItemCardPreview() {
+    IvyWalletComponentPreview {
+        TimeZoneItemCard(
+            timeZone = "America/Argentina/Catamarca".toIvyTimeZoneOrDefault(),
+            selected = true,
+            onClick = {}
+        )
     }
 }
 
