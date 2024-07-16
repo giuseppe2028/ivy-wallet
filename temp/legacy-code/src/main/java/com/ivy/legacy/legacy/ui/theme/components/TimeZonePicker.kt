@@ -179,7 +179,7 @@ private fun SearchInput(
             if (searchTextFieldValue.text.isEmpty()) {
                 // Hint
                 Text(
-                    text = stringResource(id = R.string.search_currency),
+                    text = stringResource(id = R.string.search_time_zone),
                     style = UI.typo.c.style(
                         fontWeight = FontWeight.Bold
                     )

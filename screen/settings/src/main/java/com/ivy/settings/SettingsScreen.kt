@@ -6,8 +6,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -1168,6 +1171,7 @@ fun SettingsUiTest(isDark: Boolean) {
 
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TimeZoneButton(
     timeZone: String,
@@ -1194,24 +1198,28 @@ private fun TimeZoneButton(
 
         Spacer(Modifier.width(8.dp))
 
-        Text(
-            modifier = Modifier.padding(vertical = 20.dp),
-            text = stringResource(R.string.set_time_zone),
-            style = UI.typo.b2.style(
-                color = UI.colors.pureInverse,
-                fontWeight = FontWeight.Bold
+        FlowRow(
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(R.string.set_time_zone),
+                style = UI.typo.b2.style(
+                    color = UI.colors.pureInverse,
+                    fontWeight = FontWeight.Bold
+                )
             )
-        )
 
-        Spacer(Modifier.weight(1f))
-
-        Text(
-            text = timeZone,
-            style = UI.typo.b1.style(
-                color = UI.colors.pureInverse,
-                fontWeight = FontWeight.ExtraBold
+            Text(
+                text = timeZone,
+                style = UI.typo.b1.style(
+                    color = UI.colors.pureInverse,
+                    fontWeight = FontWeight.ExtraBold
+                )
             )
-        )
+        }
 
         Spacer(Modifier.height(4.dp))
 
