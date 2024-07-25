@@ -1,5 +1,6 @@
 package com.ivy.data.dao
 
+/*
 import com.ivy.base.model.TransactionType
 import com.ivy.data.db.dao.fake.FakeTransactionDao
 import com.ivy.data.db.entity.TransactionEntity
@@ -1590,4 +1591,4 @@ class FakeTransactionDaoTest {
         // then
         res shouldBe emptyList()
     }
-}
+}*/

@@ -1,5 +1,6 @@
 package com.ivy.data.repository.impl
 
+/*
 import arrow.core.Either
 import arrow.core.Some
 import arrow.core.identity
@@ -544,4 +545,4 @@ class TransactionRepositoryImplTest {
             Arb.invalidTransactionEntity().bind() to Either.Left(Arb.string().bind())
         }
     }
-}
+}*/

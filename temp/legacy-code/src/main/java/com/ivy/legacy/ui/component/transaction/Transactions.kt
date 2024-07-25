@@ -23,6 +23,8 @@ import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.data.AppBaseData
 import com.ivy.legacy.data.LegacyDueSection
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.navigation.EditTransactionScreen
 import com.ivy.navigation.Navigation
 import com.ivy.navigation.navigation
@@ -40,7 +42,6 @@ import com.ivy.wallet.ui.theme.components.IvyIcon
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
 fun LazyListScope.transactions(
     baseData: AppBaseData,
-
     upcoming: LegacyDueSection?,
     overdue: LegacyDueSection?,
     history: List<TransactionHistoryItem>,
@@ -60,7 +61,6 @@ fun LazyListScope.transactions(
     upcomingSection(
         baseData = baseData,
         upcoming = upcoming,
-
         onPayOrGet = onPayOrGet,
         onSkipTransaction = onSkipTransaction,
         setExpanded = setUpcomingExpanded
@@ -69,7 +69,6 @@ fun LazyListScope.transactions(
     overdueSection(
         baseData = baseData,
         overdue = overdue,
-
         onPayOrGet = onPayOrGet,
         onSkipTransaction = onSkipTransaction,
         onSkipAllTransactions = onSkipAllTransactions,
@@ -80,7 +79,6 @@ fun LazyListScope.transactions(
         baseData = baseData,
 
         history = history,
-
         dateDividerMarginTop = dateDividerMarginTop,
         onPayOrGet = onPayOrGet
     )
@@ -108,7 +106,6 @@ fun LazyListScope.transactions(
 
 private fun LazyListScope.upcomingSection(
     baseData: AppBaseData,
-
     upcoming: LegacyDueSection?,
 
     onPayOrGet: (Transaction) -> Unit,
@@ -135,7 +132,6 @@ private fun LazyListScope.upcomingSection(
         if (upcoming.expanded) {
             trnItems(
                 baseData = baseData,
-
                 transactions = upcoming.trns,
 
                 onPayOrGet = onPayOrGet,
@@ -147,7 +143,6 @@ private fun LazyListScope.upcomingSection(
 
 private fun LazyListScope.overdueSection(
     baseData: AppBaseData,
-
     overdue: LegacyDueSection?,
 
     onPayOrGet: (Transaction) -> Unit,
@@ -198,7 +193,6 @@ private fun LazyListScope.overdueSection(
 
             trnItems(
                 baseData = baseData,
-
                 transactions = overdue.trns,
 
                 onPayOrGet = onPayOrGet,
@@ -210,7 +204,6 @@ private fun LazyListScope.overdueSection(
 
 private fun LazyListScope.trnItems(
     baseData: AppBaseData,
-
     transactions: List<Transaction>,
 
     onPayOrGet: (Transaction) -> Unit,
@@ -222,8 +215,8 @@ private fun LazyListScope.trnItems(
     ) {
         val nav = navigation()
         TransactionCard(
+            timeZone = "UTC".toIvyTimeZone(),
             baseData = baseData,
-
             transaction = it,
             onPayOrGet = onPayOrGet,
             onSkipTransaction = onSkipTransaction
@@ -238,7 +231,6 @@ private fun LazyListScope.trnItems(
 
 private fun LazyListScope.historySection(
     baseData: AppBaseData,
-
     history: List<TransactionHistoryItem>,
 
     dateDividerMarginTop: Dp? = null,
@@ -262,8 +254,8 @@ private fun LazyListScope.historySection(
 
                     TransactionCard(
                         baseData = baseData,
-
                         transaction = it,
+                        timeZone = "UTC".toIvyTimeZone(),
                         onPayOrGet = onPayOrGet
                     ) { trn ->
                         onTransactionClick(

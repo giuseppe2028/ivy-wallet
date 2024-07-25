@@ -3,6 +3,8 @@ package com.ivy.data.db.dao.fake
 import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.db.dao.write.WriteSettingsDao
 import com.ivy.data.db.entity.SettingsEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.jetbrains.annotations.VisibleForTesting
 import java.util.UUID
 
@@ -12,6 +14,10 @@ class FakeSettingsDao : SettingsDao, WriteSettingsDao {
 
     override suspend fun findFirst(): SettingsEntity {
         return items.first()
+    }
+
+    override fun findLatestTimeZoneFlow(): Flow<String> {
+        return flow { items.firstOrNull()?.timeZoneId }
     }
 
     override suspend fun findFirstOrNull(): SettingsEntity? {

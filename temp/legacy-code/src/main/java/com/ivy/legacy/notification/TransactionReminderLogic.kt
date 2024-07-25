@@ -5,6 +5,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ivy.base.legacy.SharedPrefs
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.utils.timeNowLocal
 import com.ivy.legacy.utils.toEpochSeconds
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,17 +41,17 @@ class TransactionReminderLogic @Inject constructor(
             return
         }
 
-        val timeNowLocal = timeNowLocal()
-        val today8PM = timeNowLocal()
+        val timeNowLocal = timeNowLocal(IvyTimeZone.getDeviceDefault())
+        val today8PM = timeNowLocal(IvyTimeZone.getDeviceDefault())
             .withHour(20)
             .withMinute(0)
 
         val initialDelaySeconds = if (today8PM.isAfter(timeNowLocal)) {
             // 8 PM is in the future, we can start reminder today
-            today8PM.toEpochSeconds() - timeNowLocal.toEpochSeconds()
+            today8PM.toEpochSecond() - timeNowLocal.toEpochSecond()
         } else {
             // 8 PM has passed, we'll start reminding from tomorrow
-            today8PM.plusDays(1).toEpochSeconds() - timeNowLocal.toEpochSeconds()
+            today8PM.plusDays(1).toEpochSecond() - timeNowLocal.toEpochSecond()
         }
 
         val workBuilder = PeriodicWorkRequestBuilder<TransactionReminderWorker>(24, TimeUnit.HOURS)

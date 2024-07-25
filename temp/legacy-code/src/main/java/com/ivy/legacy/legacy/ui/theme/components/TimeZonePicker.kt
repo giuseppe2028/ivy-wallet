@@ -70,6 +70,7 @@ import com.ivy.wallet.ui.theme.White
 import com.ivy.wallet.ui.theme.components.IvyIcon
 import com.ivy.wallet.ui.theme.modal.DURATION_MODAL_ANIM
 import com.ivy.wallet.ui.theme.pureBlur
+import java.time.ZoneId
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
 @Suppress("ParameterNaming")
@@ -239,7 +240,7 @@ private fun SelectedTimeZoneCard(
 
         Column {
             Text(
-                text = timeZone.id,
+                text = timeZone.zoneId.id,
                 style = UI.typo.b2.style(
                     color = White,
                     fontWeight = FontWeight.SemiBold
@@ -303,9 +304,9 @@ private fun TimeZoneList(
         // filter with searchQuery for available timeZones
         val timeZonesToShow = allSupportedTimeZones.filter {
             searchQuery.isBlank() ||
-                    it.id.contains(searchQuery, ignoreCase = true) ||
+                    it.zoneId.id.contains(searchQuery, ignoreCase = true) ||
                     it.offset.contains(searchQuery, ignoreCase = true)
-        }.sortedBy { it.id }
+        }.sortedBy { it.zoneId.id }
 
         timeZonesWithLetterDividers = getTimeZonesWithLetterDividers(timeZonesToShow)
     }
@@ -392,7 +393,7 @@ private fun TimeZoneItemCard(
             Spacer(Modifier.width(24.dp))
 
             Text(
-                text = timeZone.id,
+                text = timeZone.zoneId.id,
                 style = UI.typo.b1.style(
                     color = if (selected) White else UI.colors.pureInverse,
                     fontWeight = FontWeight.ExtraBold
@@ -442,7 +443,7 @@ private fun Preview() {
         TimeZonePicker(
             initialSelectedTimeZone = null,
             includeKeyboardShownInsetSpacer = true,
-            preselectedTimeZone = IvyTimeZone("Europe/Rome","+02:00")
+            preselectedTimeZone = IvyTimeZone(ZoneId.of("Europe/Rome"),"+02:00")
         ) {}
     }
 }
@@ -464,7 +465,7 @@ private fun getTimeZonesWithLetterDividers(timeZones: List<IvyTimeZone>): List<A
     val timeZonesWithLetters = mutableListOf<Any>()
     var lastFirstLetter: String? = null
     for (timeZone in timeZones) {
-        val firstLetter =  timeZone.id.first().toString()
+        val firstLetter =  timeZone.zoneId.id.first().toString()
         if (firstLetter != lastFirstLetter) {
             timeZonesWithLetters.add(
                 //TODO review the access of letterDevider

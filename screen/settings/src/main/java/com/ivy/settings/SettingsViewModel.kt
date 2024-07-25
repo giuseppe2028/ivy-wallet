@@ -75,7 +75,7 @@ class SettingsViewModel @Inject constructor(
         }
 
         return SettingsState(
-            timeZoneCode = getTimezoneCode(),
+            timeZoneCode = getTimezone(),
             currencyCode = getCurrencyCode(),
             name = getName(),
             currentTheme = getCurrentTheme(),
@@ -162,8 +162,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     @Composable
-    private fun getTimezoneCode(): String {
-        return timeZone.value.id
+    private fun getTimezone(): String {
+        return timeZone.value.zoneId.id
     }
 
     @Composable
@@ -409,7 +409,7 @@ class SettingsViewModel @Inject constructor(
             ioThread {
                 settingsWriter.save(
                     settingsDao.findFirst().copy(
-                        timeZoneId = newTimeZone.id
+                        timeZoneId = newTimeZone.zoneId.id
                     )
                 )
             }

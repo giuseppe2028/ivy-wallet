@@ -40,6 +40,8 @@ import com.ivy.legacy.data.LegacyDueSection
 import com.ivy.legacy.data.model.MainTab
 import com.ivy.legacy.data.model.Month
 import com.ivy.legacy.data.model.TimePeriod
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.legacy.ivyWalletCtx
 import com.ivy.legacy.ui.component.transaction.TransactionsDividerLine
 import com.ivy.legacy.ui.component.transaction.transactions
@@ -176,6 +178,7 @@ fun BoxWithConstraintsScope.HomeUi(
 
             period = uiState.period,
             listState = listState,
+
 
             baseData = uiState.baseData,
 
@@ -394,7 +397,7 @@ private fun BoxWithConstraintsScope.PreviewHomeTab(isDark: Boolean = false) {
                 baseData = AppBaseData(
                     baseCurrency = "",
                     accounts = persistentListOf(),
-                    categories = persistentListOf()
+                    categories = persistentListOf(),
                 ),
                 balance = BigDecimal.ZERO,
                 buffer = BufferInfo(
@@ -417,7 +420,9 @@ private fun BoxWithConstraintsScope.PreviewHomeTab(isDark: Boolean = false) {
                 period = TimePeriod(month = Month.monthsList().first(), year = 2023),
                 hideBalance = false,
                 hideIncome = false,
-                expanded = false
+                expanded = false,
+                //TODO fix this
+                timeZone = "UTC".toIvyTimeZone()
             ),
             onEvent = {}
         )

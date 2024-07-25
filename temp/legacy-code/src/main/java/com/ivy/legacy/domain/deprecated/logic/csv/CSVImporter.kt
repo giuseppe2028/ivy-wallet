@@ -23,8 +23,12 @@ import com.ivy.design.l0_system.Green
 import com.ivy.design.l0_system.IvyDark
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
 import com.ivy.legacy.datamodel.toEntity
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.convertLocalToUTC
+import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC
+import com.ivy.legacy.utils.toInstantUTC
 import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.wallet.domain.data.IvyCurrency
 import com.ivy.wallet.domain.deprecated.logic.csv.model.RowMapping
@@ -163,6 +167,8 @@ class CSVImporter @Inject constructor(
         row: List<String>,
         rowMapping: RowMapping
     ): Transaction? {
+        suspend fun getTimeZone(): IvyTimeZone = ioThread { settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault() }
+
         val type = mapType(
             row = row,
             rowMapping = rowMapping
@@ -244,8 +250,8 @@ class CSVImporter @Inject constructor(
                 accountId = account.id,
                 toAccountId = toAccount?.id,
                 toAmount = toAmount?.toBigDecimal() ?: amount.toBigDecimal(),
-                dateTime = dateTime,
-                dueDate = dueDate,
+                dateTime = dateTime?.toInstantUTC(getTimeZone()),
+                dueDate = dueDate?.toInstantUTC(getTimeZone()),
                 categoryId = category?.id?.value,
                 title = title,
                 description = description

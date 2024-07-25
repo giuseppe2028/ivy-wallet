@@ -1,17 +1,22 @@
 package com.ivy.wallet.domain.deprecated.logic
 
 import com.ivy.base.legacy.Transaction
+import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.repository.TransactionRepository
 import com.ivy.data.repository.mapper.TransactionMapper
 import com.ivy.legacy.datamodel.PlannedPaymentRule
 import com.ivy.legacy.datamodel.temp.toDomain
+import com.ivy.legacy.domain.data.toIvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.incrementDate
+import com.ivy.legacy.utils.toInstantUTC
 import java.time.LocalDateTime
 import javax.inject.Inject
 
 class PlannedPaymentsGenerator @Inject constructor(
     private val transactionMapper: TransactionMapper,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val settingsDao: SettingsDao
 ) {
     companion object {
         private const val GENERATED_INSTANCES_LIMIT = 72
@@ -34,7 +39,7 @@ class PlannedPaymentsGenerator @Inject constructor(
         val trns = transactionRepository.findAllByRecurringRuleId(recurringRuleId = rule.id)
 
         if (trns.isEmpty()) {
-            generateTransaction(rule, rule.startDate!!)
+            generateTransaction(rule, rule.startDate!!,settingsDao)
         }
     }
 
@@ -60,7 +65,8 @@ class PlannedPaymentsGenerator @Inject constructor(
                 // generate transaction
                 generateTransaction(
                     rule = rule,
-                    dueDate = date
+                    dueDate = date,
+                    settingsDao
                 )
                 generatedTransactions++
             }
@@ -73,7 +79,7 @@ class PlannedPaymentsGenerator @Inject constructor(
         }
     }
 
-    private suspend fun generateTransaction(rule: PlannedPaymentRule, dueDate: LocalDateTime) {
+    private suspend fun generateTransaction(rule: PlannedPaymentRule, dueDate: LocalDateTime,settingsDao: SettingsDao) {
             Transaction(
                 type = rule.type,
                 accountId = rule.accountId,
@@ -82,7 +88,7 @@ class PlannedPaymentsGenerator @Inject constructor(
                 amount = rule.amount.toBigDecimal(),
                 title = rule.title,
                 description = rule.description,
-                dueDate = dueDate,
+                dueDate = dueDate.toInstantUTC(settingsDao.findFirst().timeZoneId?.toIvyTimeZone()),
                 dateTime = null,
                 toAccountId = null,
                 isSynced = false

@@ -28,6 +28,7 @@ import com.ivy.legacy.legacy.ui.theme.components.TimeZonePicker
 import com.ivy.wallet.ui.theme.modal.IvyModal
 import com.ivy.wallet.ui.theme.modal.ModalSave
 import com.ivy.wallet.ui.theme.modal.ModalTitle
+import java.time.ZoneId
 import java.util.UUID
 
 
@@ -110,7 +111,7 @@ private fun Preview() {
     IvyWalletPreview {
         TimeZoneModal(
             title = "Set TimeZone",
-            initialTimeZone = IvyTimeZone("Africa/Accra", "+00:00"),
+            initialTimeZone = IvyTimeZone(ZoneId.of("Africa/Accra"), "+00:00"),
             visible = true,
             dismiss = {},
             onSetTimeZone = {}

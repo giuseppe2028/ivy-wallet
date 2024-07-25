@@ -6,11 +6,13 @@ import com.ivy.base.legacy.TransactionHistoryItem
 import com.ivy.data.model.Category
 import com.ivy.legacy.data.model.TimePeriod
 import com.ivy.legacy.datamodel.Account
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.wallet.ui.theme.modal.ChoosePeriodModalData
 import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
 data class TransactionsState(
+    val timeZone:IvyTimeZone?,
     val period: TimePeriod,
     val baseCurrency: String,
     val currency: String,

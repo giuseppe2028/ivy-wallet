@@ -26,10 +26,13 @@ import com.ivy.data.repository.TagRepository
 import com.ivy.data.repository.TransactionRepository
 import com.ivy.data.repository.mapper.TagMapper
 import com.ivy.data.repository.mapper.TransactionMapper
+import com.ivy.design.api.ivyContext
 import com.ivy.domain.features.Features
 import com.ivy.legacy.data.EditTransactionDisplayLoan
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.temp.toDomain
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.domain.deprecated.logic.AccountCreator
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.convertUTCToLocal
@@ -38,6 +41,8 @@ import com.ivy.legacy.utils.getTrueDate
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowLocal
 import com.ivy.legacy.utils.timeUTC
+import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toLocalDateTimeWithZone
 import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.legacy.utils.uiThread
 import com.ivy.navigation.EditTransactionScreen
@@ -74,9 +79,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.util.UUID
 import javax.inject.Inject
 
@@ -106,7 +113,7 @@ class EditTransactionViewModel @Inject constructor(
     private val transactionMapper: TransactionMapper,
     private val tagRepository: TagRepository,
     private val tagMapper: TagMapper,
-    private val features: Features
+    private val features: Features,
 ) : ComposeViewModel<EditTransactionState, EditTransactionEvent>() {
 
     private val transactionType = mutableStateOf(TransactionType.EXPENSE)
@@ -114,9 +121,9 @@ class EditTransactionViewModel @Inject constructor(
     private val titleSuggestions = mutableStateOf(persistentSetOf<String>())
     private val currency = mutableStateOf("")
     private val description = mutableStateOf<String?>(null)
-    private val dateTime = mutableStateOf<LocalDateTime?>(null)
-    private val dueDate = mutableStateOf<LocalDateTime?>(null)
-    private val paidHistory = mutableStateOf<LocalDateTime?>(null)
+    private val dateTime = mutableStateOf<Instant?>(null)
+    private val dueDate = mutableStateOf<Instant?>(null)
+    private val paidHistory = mutableStateOf<Instant?>(null)
     private val date = MutableStateFlow<LocalDate?>(null)
     private val time = MutableStateFlow<LocalTime?>(null)
     private val accounts = mutableStateOf<ImmutableList<Account>>(persistentListOf())
@@ -130,6 +137,7 @@ class EditTransactionViewModel @Inject constructor(
     private val hasChanges = mutableStateOf(false)
     private val displayLoanHelper = mutableStateOf(EditTransactionDisplayLoan())
 
+    private var timezone = mutableStateOf<IvyTimeZone?>(null)
     // This is used to when the transaction is associated with a loan/loan record,
     // used to indicate the background updating of loan/loanRecord data
     private val backgroundProcessingStarted = mutableStateOf(false)
@@ -152,6 +160,8 @@ class EditTransactionViewModel @Inject constructor(
             editMode = screen.initialTransactionId != null
 
             baseUserCurrency = baseCurrency()
+
+            timezone.value = getTimeZone()
 
             val tagList = async { getAllTags() }
 
@@ -240,12 +250,12 @@ class EditTransactionViewModel @Inject constructor(
 
     @Composable
     private fun getDateTime(): LocalDateTime? {
-        return dateTime.value
+        return dateTime.value?.toLocalDateTimeWithZone(timezone.value)
     }
 
     @Composable
     private fun getDueDate(): LocalDateTime? {
-        return dueDate.value
+        return dueDate.value?.toLocalDateTimeWithZone(timezone.value)
     }
 
     @Composable
@@ -524,18 +534,18 @@ class EditTransactionViewModel @Inject constructor(
 
     private fun onDueDateChanged(newDueDate: LocalDateTime?) {
         loadedTransaction = loadedTransaction().copy(
-            dueDate = newDueDate
+            dueDate = newDueDate?.toInstantUTC(timezone.value)
         )
-        dueDate.value = newDueDate
+        dueDate.value = newDueDate?.toInstantUTC(timezone.value)
 
         saveIfEditMode()
     }
 
     private fun onSetDateTime(newDateTime: LocalDateTime) {
         loadedTransaction = loadedTransaction().copy(
-            dateTime = newDateTime
+            dateTime = newDateTime.toInstantUTC(timezone.value)
         )
-        dateTime.value = newDateTime
+        dateTime.value = newDateTime.toInstantUTC(timezone.value)
 
         saveIfEditMode()
     }
@@ -548,7 +558,8 @@ class EditTransactionViewModel @Inject constructor(
         onSetDateTime(
             getTrueDate(
                 loadedTransaction?.date ?: dateNowLocal(),
-                (dateTime.value?.toLocalTime() ?: timeUTC()),
+                //TODO insert the one preferred
+                (dateTime.value?.atZone(ZoneId.of("ACT"))?.toLocalTime() ?: timeUTC()),
                 true
             )
         )
@@ -560,8 +571,9 @@ class EditTransactionViewModel @Inject constructor(
         )
         time.value = newTime
         onSetDateTime(
+            //TODO take a look
             getTrueDate(
-                dateTime.value?.toLocalDate() ?: dateNowLocal(),
+                dateTime.value?.atZone(ZoneId.of("ACT"))?.toLocalDate() ?: dateNowLocal(),
                 loadedTransaction?.time ?: timeUTC(),
                 true
             )
@@ -684,7 +696,7 @@ class EditTransactionViewModel @Inject constructor(
                     dateTime = when {
                         loadedTransaction().dateTime == null &&
                                 dueDate.value == null -> {
-                            timeNowLocal()
+                            timeNowLocal(getTimeZone()).toLocalDateTime().toInstantUTC(timezone.value)
                         }
 
                         else -> loadedTransaction().dateTime
@@ -744,6 +756,7 @@ class EditTransactionViewModel @Inject constructor(
     }
 
     private suspend fun baseCurrency(): String = ioThread { settingsDao.findFirst().currency }
+    private suspend fun getTimeZone(): IvyTimeZone = ioThread { settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault() }
 
     private fun closeScreen() {
         if (nav.backStackEmpty()) {

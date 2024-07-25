@@ -152,13 +152,12 @@ object LegacyTrnDateDividers {
         if (transactions.isEmpty()) return emptyList()
 
         return transactions
-            .groupBy { it.dateTime?.convertUTCtoLocal()?.toLocalDate() }
+            .groupBy { it.dateTime }
             .filterKeys { it != null }
             .toSortedMap { date1, date2 ->
                 if (date1 == null || date2 == null) return@toSortedMap 0 // this case shouldn't happen
                 (
-                        date2.atStartOfDay().toEpochSeconds() - date1.atStartOfDay()
-                            .toEpochSeconds()
+                        date2.toEpochMilli() - date1.toEpochMilli()
                         ).toInt()
             }
             .flatMap { (date, transactionsForDate) ->
@@ -170,7 +169,7 @@ object LegacyTrnDateDividers {
 
                 listOf<TransactionHistoryItem>(
                     TransactionHistoryDateDivider(
-                        date = date!!,
+                        date = date!!.convertToLocal().toLocalDate(),
                         income = LegacyFoldTransactions.sumTrns(
                             LegacyTrnFunctions.incomes(transactionsForDate),
                             ::exchangeInBaseCurrency,

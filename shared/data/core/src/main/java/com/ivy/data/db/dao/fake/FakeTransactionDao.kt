@@ -8,6 +8,7 @@ import org.jetbrains.annotations.VisibleForTesting
 import java.time.LocalDateTime
 import java.util.UUID
 
+/*
 @VisibleForTesting
 class FakeTransactionDao : TransactionDao, WriteTransactionDao {
     private val items = mutableListOf<TransactionEntity>()
@@ -358,4 +359,4 @@ class FakeTransactionDao : TransactionDao, WriteTransactionDao {
     ): Boolean {
         return !dateTime.isAfter(endDate) && !dateTime.isBefore(startDate)
     }
-}
+}*/

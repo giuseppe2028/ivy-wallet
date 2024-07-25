@@ -11,10 +11,12 @@ import com.ivy.ui.ComposeViewModel
 import com.ivy.data.model.Category
 import com.ivy.data.repository.CategoryRepository
 import com.ivy.legacy.datamodel.Account
+import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.legacy.utils.getDefaultFIATCurrency
 import com.ivy.legacy.utils.ioThread
 import com.ivy.wallet.domain.action.account.AccountsAct
 import com.ivy.wallet.domain.action.settings.BaseCurrencyAct
+import com.ivy.wallet.domain.action.settings.SettingsAct
 import com.ivy.wallet.domain.action.transaction.AllTrnsAct
 import com.ivy.wallet.domain.action.transaction.TrnsWithDateDivsAct
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +33,8 @@ class SearchViewModel @Inject constructor(
     private val accountsAct: AccountsAct,
     private val categoryRepository: CategoryRepository,
     private val baseCurrencyAct: BaseCurrencyAct,
-    private val allTrnsAct: AllTrnsAct
+    private val allTrnsAct: AllTrnsAct,
+    private val settings: SettingsAct
 ) : ComposeViewModel<SearchState, SearchEvent>() {
 
     private val transactions =
@@ -52,7 +55,8 @@ class SearchViewModel @Inject constructor(
             transactions = transactions.value,
             baseCurrency = baseCurrency.value,
             accounts = accounts.value,
-            categories = categories.value
+            categories = categories.value,
+            timeZone = "UTC".toIvyTimeZone()
         )
     }
 

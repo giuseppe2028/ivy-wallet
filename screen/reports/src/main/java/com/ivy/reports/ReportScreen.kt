@@ -269,6 +269,7 @@ private fun BoxWithConstraintsScope.UI(
                 onSkipTransaction = {
                     onEventHandler.invoke(ReportScreenEvent.SkipTransactionLegacy(transaction = it))
                 },
+
                 onSkipAllTransactions = {
                     onEventHandler.invoke(ReportScreenEvent.SkipTransactionsLegacy(transactions = it))
                 }

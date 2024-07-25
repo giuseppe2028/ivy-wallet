@@ -25,6 +25,9 @@ import com.ivy.importdata.csv.TransferFields
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
 import com.ivy.legacy.datamodel.toEntity
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.utils.toInstantUTC
 import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.wallet.domain.data.IvyCurrency
 import com.ivy.wallet.domain.pure.util.nextOrderNum
@@ -74,6 +77,8 @@ class CSVImporterV2 @Inject constructor(
 
         val baseCurrency = settingsDao.findFirst().currency
 
+        val timeZone = settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault()
+
         val failedRows = mutableListOf<CSVRow>()
 
         val transactions = rows.mapIndexedNotNull { index, row ->
@@ -85,6 +90,7 @@ class CSVImporterV2 @Inject constructor(
             onProgress(progressPercent / 2)
 
             val transaction = mapToTransaction(
+                timeZone = timeZone,
                 baseCurrency = baseCurrency,
                 importantFields = importantFields,
                 transferFields = transferFields,
@@ -127,6 +133,7 @@ class CSVImporterV2 @Inject constructor(
     }
 
     private suspend fun mapToTransaction(
+        timeZone: IvyTimeZone,
         baseCurrency: String,
         row: CSVRowNew,
         importantFields: ImportantFields,
@@ -232,7 +239,7 @@ class CSVImporterV2 @Inject constructor(
             accountId = account.id,
             toAccountId = toAccount?.id,
             toAmount = toAmount?.toBigDecimal() ?: amount.toBigDecimal(),
-            dateTime = dateTime,
+            dateTime = dateTime.toInstantUTC(timeZone),
             dueDate = null,
             categoryId = category?.id?.value,
             title = title,

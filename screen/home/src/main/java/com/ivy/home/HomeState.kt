@@ -8,6 +8,7 @@ import com.ivy.legacy.data.AppBaseData
 import com.ivy.legacy.data.BufferInfo
 import com.ivy.legacy.data.LegacyDueSection
 import com.ivy.legacy.data.model.TimePeriod
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.wallet.domain.pure.data.IncomeExpensePair
 import kotlinx.collections.immutable.ImmutableList
 import java.math.BigDecimal
@@ -16,6 +17,8 @@ import java.math.BigDecimal
 data class HomeState(
     val theme: Theme,
     val name: String,
+
+    val timeZone: IvyTimeZone?,
 
     val period: TimePeriod,
     val baseData: AppBaseData,

@@ -8,6 +8,7 @@ import com.ivy.base.kotlinxserilzation.KSerializerUUID
 import com.ivy.base.model.LoanRecordType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.*
 
@@ -25,7 +26,7 @@ data class LoanRecordEntity(
     val note: String? = null,
     @SerialName("dateTime")
     @Serializable(with = KSerializerLocalDateTime::class)
-    val dateTime: LocalDateTime,
+    val dateTime: Instant,
     @SerialName("interest")
     val interest: Boolean = false,
     @SerialName("accountId")

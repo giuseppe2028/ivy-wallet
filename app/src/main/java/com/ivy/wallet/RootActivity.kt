@@ -43,6 +43,7 @@ import com.ivy.home.customerjourney.CustomerJourneyCardsProvider
 import com.ivy.legacy.Constants
 import com.ivy.legacy.IvyWalletCtx
 import com.ivy.legacy.appDesign
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.utils.activityForResultLauncher
 import com.ivy.legacy.utils.convertLocalToUTC
 import com.ivy.legacy.utils.sendToCrashlytics
@@ -97,7 +98,9 @@ class RootActivity : AppCompatActivity(), RootScreen {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setupDatePicker()
-        setupTimePicker()
+        viewModel.ivyTimeZone.observe(this) { zone ->
+            setupTimePicker(zone)
+        }
 
         AddTransactionWidget.updateBroadcast(this)
         AddTransactionWidgetCompact.updateBroadcast(this)
@@ -186,9 +189,10 @@ class RootActivity : AppCompatActivity(), RootScreen {
         }
     }
 
-    private fun setupTimePicker() {
+    private fun setupTimePicker(tz: IvyTimeZone) {
+        Timber.d("updating onShowTimePicker - $tz")
         ivyContext.onShowTimePicker = { onTimePicked ->
-            val nowLocal = timeNowLocal()
+            val nowLocal = timeNowLocal(tz)
             val picker =
                 MaterialTimePicker.Builder()
                     .setTimeFormat(TimeFormat.CLOCK_12H)

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.ivy.base.legacy.Theme
 import com.ivy.base.legacy.Transaction
 import com.ivy.base.legacy.TransactionHistoryItem
+import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.model.primitive.AssetCode
 import com.ivy.data.repository.CategoryRepository
 import com.ivy.data.repository.mapper.TransactionMapper
@@ -29,6 +30,7 @@ import com.ivy.legacy.datamodel.Settings
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
 import com.ivy.legacy.domain.action.settings.UpdateSettingsAct
 import com.ivy.legacy.domain.action.viewmodel.home.ShouldHideIncomeAct
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.utils.dateNowUTC
 import com.ivy.legacy.utils.ioThread
 import com.ivy.navigation.BalanceScreen
@@ -89,6 +91,9 @@ class HomeViewModel @Inject constructor(
     private val currentTheme = mutableStateOf(Theme.AUTO)
     private val name = mutableStateOf("")
     private val period = mutableStateOf(ivyContext.selectedPeriod)
+
+    private val timeZone = mutableStateOf<IvyTimeZone?>(null)
+
     private val baseData = mutableStateOf(
         AppBaseData(
             baseCurrency = "",
@@ -145,7 +150,8 @@ class HomeViewModel @Inject constructor(
             customerJourneyCards = getCustomerJourneyCards(),
             hideBalance = getHideBalance(),
             expanded = getExpanded(),
-            hideIncome = getHideIncome()
+            hideIncome = getHideIncome(),
+            timeZone = getTimeZone()
         )
     }
 
@@ -162,6 +168,11 @@ class HomeViewModel @Inject constructor(
     @Composable
     private fun getPeriod(): TimePeriod {
         return period.value
+    }
+
+    @Composable
+    private fun getTimeZone(): IvyTimeZone? {
+        return timeZone.value
     }
 
     @Composable

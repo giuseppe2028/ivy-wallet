@@ -44,6 +44,8 @@ import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.Loan
 import com.ivy.legacy.datamodel.LoanRecord
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.humanReadableType
 import com.ivy.legacy.ui.component.ItemStatisticToolbar
 import com.ivy.legacy.ui.component.transaction.TypeAmountCurrency
@@ -55,6 +57,8 @@ import com.ivy.legacy.utils.formatNicelyWithTime
 import com.ivy.legacy.utils.isNotNullOrBlank
 import com.ivy.legacy.utils.rememberInteractionSource
 import com.ivy.legacy.utils.setStatusBarDarkTextCompat
+import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toLocalDateTimeWithZone
 import com.ivy.loans.loan.data.DisplayLoanRecord
 import com.ivy.loans.loandetails.events.DeleteLoanModalEvent
 import com.ivy.loans.loandetails.events.LoanDetailsScreenEvent
@@ -607,7 +611,8 @@ fun LazyListScope.loanRecords(
             loanRecord = displayLoanRecord.loanRecord,
             baseCurrency = displayLoanRecord.loanRecordCurrencyCode,
             account = displayLoanRecord.account,
-            loanBaseCurrency = displayLoanRecord.loanCurrencyCode
+            loanBaseCurrency = displayLoanRecord.loanCurrencyCode,
+            timeZone = displayLoanRecord.timeZone
         ) {
             onClick(displayLoanRecord)
         }
@@ -618,6 +623,7 @@ fun LazyListScope.loanRecords(
 
 @Composable
 private fun LoanRecordItem(
+    timeZone: IvyTimeZone?,
     loan: Loan,
     loanRecord: LoanRecord,
     baseCurrency: String,
@@ -697,7 +703,7 @@ private fun LoanRecordItem(
 
         Text(
             modifier = Modifier.padding(horizontal = 24.dp),
-            text = loanRecord.dateTime.formatNicelyWithTime(
+            text = loanRecord.dateTime.toLocalDateTimeWithZone(timeZone).formatNicelyWithTime(
                 noWeekDay = false
             ).uppercase(),
             style = UI.typo.nC.style(
@@ -855,6 +861,7 @@ private fun Preview_Empty() {
     IvyWalletPreview {
         UI(
             LoanDetailsScreenState(
+                timeZone = "ACT".toIvyTimeZoneOrDefault(),
                 baseCurrency = "BGN",
                 loan = Loan(
                     name = "Loan 1",
@@ -888,6 +895,7 @@ private fun Preview_Records(theme: Theme = Theme.LIGHT) {
     IvyWalletPreview(theme) {
         UI(
             LoanDetailsScreenState(
+                timeZone = "ACT".toIvyTimeZoneOrDefault(),
                 baseCurrency = "BGN",
                 loan = Loan(
                     name = "Loan 1",
@@ -900,7 +908,7 @@ private fun Preview_Records(theme: Theme = Theme.LIGHT) {
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 123.45,
-                            dateTime = testDateTime.minusDays(1),
+                            dateTime = testDateTime.minusDays(1).toInstantUTC("ACT".toIvyTimeZoneOrDefault()),
                             note = "Cash",
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.INCREASE
@@ -909,7 +917,7 @@ private fun Preview_Records(theme: Theme = Theme.LIGHT) {
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 0.50,
-                            dateTime = testDateTime.minusYears(1),
+                            dateTime = testDateTime.minusYears(1).toInstantUTC("ACT".toIvyTimeZoneOrDefault()),
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.DECREASE
                         )
@@ -917,7 +925,7 @@ private fun Preview_Records(theme: Theme = Theme.LIGHT) {
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 1000.00,
-                            dateTime = testDateTime.minusMonths(1),
+                            dateTime = testDateTime.minusMonths(1).toInstantUTC("ACT".toIvyTimeZoneOrDefault()),
                             note = "Revolut",
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.INCREASE

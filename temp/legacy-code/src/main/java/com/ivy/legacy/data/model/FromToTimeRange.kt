@@ -2,11 +2,13 @@ package com.ivy.legacy.data.model
 
 import androidx.compose.runtime.Immutable
 import com.ivy.base.legacy.Transaction
+import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.legacy.utils.beginningOfIvyTime
 import com.ivy.legacy.utils.dateNowUTC
 import com.ivy.legacy.utils.formatDateOnly
 import com.ivy.legacy.utils.startOfDayNowUTC
 import com.ivy.legacy.utils.timeNowUTC
+import com.ivy.legacy.utils.toInstantUTC
 import com.ivy.legacy.utils.toIvyFutureTime
 import com.ivy.wallet.domain.pure.data.ClosedTimeRange
 import java.time.LocalDateTime
@@ -62,7 +64,7 @@ fun Iterable<Transaction>.filterUpcomingLegacy(): List<Transaction> {
 
     return filter {
         // make sure that it's in the future
-        it.dueDate != null && it.dueDate!!.isAfter(todayStartOfDayUTC)
+        it.dueDate != null && it.dueDate!!.isAfter(todayStartOfDayUTC.toInstant(ZoneOffset.UTC))
     }
 }
 
@@ -81,7 +83,7 @@ fun Iterable<Transaction>.filterOverdueLegacy(): List<Transaction> {
 
     return filter {
         // make sure that it's in the past
-        it.dueDate != null && it.dueDate!!.isBefore(todayStartOfDayUTC)
+        it.dueDate != null && it.dueDate!!.isBefore(todayStartOfDayUTC.toInstant(ZoneOffset.UTC))
     }
 }
 

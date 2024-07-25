@@ -4,6 +4,7 @@ import arrow.core.getOrElse
 import com.ivy.base.legacy.SharedPrefs
 import com.ivy.base.legacy.Transaction
 import com.ivy.base.model.TransactionType
+import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.model.AccountId
 import com.ivy.data.model.Expense
 import com.ivy.data.model.Income
@@ -15,7 +16,10 @@ import com.ivy.legacy.data.model.filterOverdue
 import com.ivy.legacy.data.model.filterUpcoming
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.temp.toDomain
+import com.ivy.legacy.domain.data.toIvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.timeNowUTC
+import com.ivy.legacy.utils.toInstantUTC
 import com.ivy.wallet.domain.action.viewmodel.account.AccountDataAct
 import com.ivy.wallet.domain.pure.data.ClosedTimeRange
 import kotlinx.collections.immutable.toImmutableList
@@ -30,6 +34,7 @@ class WalletAccountLogic @Inject constructor(
     private val accountDataAct: AccountDataAct,
     private val sharedPrefs: SharedPrefs,
     private val currencyRepository: CurrencyRepository,
+    private val settingsDao: SettingsDao
 ) {
 
     suspend fun adjustBalance(
@@ -54,7 +59,7 @@ class WalletAccountLogic @Inject constructor(
                     title = adjustTransactionTitle,
                     amount = diff.absoluteValue.toBigDecimal(),
                     toAmount = diff.absoluteValue.toBigDecimal(),
-                    dateTime = timeNowUTC(),
+                    dateTime = timeNowUTC().toInstantUTC(settingsDao.findFirst().timeZoneId?.toIvyTimeZone()),
                     accountId = account.id,
                     isSynced = trnIsSyncedFlag
                 ).toDomain(transactionMapper)?.let {
@@ -69,7 +74,7 @@ class WalletAccountLogic @Inject constructor(
                     title = adjustTransactionTitle,
                     amount = diff.absoluteValue.toBigDecimal(),
                     toAmount = diff.absoluteValue.toBigDecimal(),
-                    dateTime = timeNowUTC(),
+                    dateTime = timeNowUTC().toInstantUTC(settingsDao.findFirst().timeZoneId?.toIvyTimeZone()),
                     accountId = account.id,
                     isSynced = trnIsSyncedFlag
                 ).toDomain(transactionMapper)?.let {

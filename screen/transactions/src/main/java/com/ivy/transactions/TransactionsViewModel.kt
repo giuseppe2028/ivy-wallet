@@ -13,6 +13,7 @@ import com.ivy.base.legacy.TransactionHistoryItem
 import com.ivy.base.legacy.stringRes
 import com.ivy.base.model.TransactionType
 import com.ivy.data.db.dao.read.AccountDao
+import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.db.dao.write.WriteCategoryDao
 import com.ivy.data.db.dao.write.WritePlannedPaymentRuleDao
 import com.ivy.data.model.AccountId
@@ -33,6 +34,8 @@ import com.ivy.legacy.data.model.TimePeriod
 import com.ivy.legacy.data.model.toCloseTimeRange
 import com.ivy.legacy.datamodel.temp.toImmutableLegacyTags
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.legacy.domain.deprecated.logic.AccountCreator
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.dateNowUTC
@@ -72,6 +75,7 @@ import com.ivy.legacy.datamodel.Account as LegacyAccount
 class TransactionsViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
     private val accountDao: AccountDao,
+    private val settingsDao: SettingsDao,
     private val categoryRepository: CategoryRepository,
     private val ivyContext: IvyWalletCtx,
     private val nav: Navigation,
@@ -105,7 +109,7 @@ class TransactionsViewModel @Inject constructor(
     private val balanceBaseCurrency = mutableStateOf<Double?>(null)
     private val income = mutableDoubleStateOf(0.0)
     private val expenses = mutableDoubleStateOf(0.0)
-
+    private val timeZone = mutableStateOf<IvyTimeZone?>(null)
     // Upcoming
     private val upcoming = mutableStateOf<ImmutableList<Transaction>>(persistentListOf())
     private val upcomingIncome = mutableDoubleStateOf(0.0)
@@ -135,6 +139,7 @@ class TransactionsViewModel @Inject constructor(
     @Composable
     override fun uiState(): TransactionsState {
         return TransactionsState(
+            timeZone = getTimeZone(),
             period = getPeriod(),
             baseCurrency = getBaseCurrency(),
             currency = getCurrency(),
@@ -167,6 +172,11 @@ class TransactionsViewModel @Inject constructor(
     @Composable
     private fun getPeriod(): TimePeriod {
         return period.value
+    }
+
+    @Composable
+    private fun getTimeZone(): IvyTimeZone? {
+        return timeZone.value
     }
 
     @Composable
@@ -837,6 +847,8 @@ class TransactionsViewModel @Inject constructor(
             val baseCurrencyValue = baseCurrencyAct(Unit)
             baseCurrency.value = baseCurrencyValue
             currency.value = baseCurrency.value
+
+            timeZone.value = settingsDao.findFirst().timeZoneId?.toIvyTimeZone()
 
             categories.value = categoryRepository.findAll().toImmutableList()
             accounts.value = accountsAct(Unit)

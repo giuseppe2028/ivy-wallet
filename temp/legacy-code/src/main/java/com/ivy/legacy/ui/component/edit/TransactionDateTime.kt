@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.IvyWalletComponentPreview
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.utils.formatNicely
 import com.ivy.legacy.utils.formatTimeOnly
 import com.ivy.legacy.utils.timeNowLocal
@@ -79,7 +80,7 @@ fun TransactionDateTime(
                 }
             )
             Text(
-                text = " " + (dateTime?.formatTimeOnly() ?: timeNowLocal().formatTimeOnly()),
+                text = " " + (dateTime?.formatTimeOnly() ?: timeNowLocal(IvyTimeZone.getDeviceDefault()).toLocalDateTime().formatTimeOnly()),
                 style = UI.typo.nB2.style(
                     color = UI.colors.pureInverse,
                     fontWeight = FontWeight.ExtraBold

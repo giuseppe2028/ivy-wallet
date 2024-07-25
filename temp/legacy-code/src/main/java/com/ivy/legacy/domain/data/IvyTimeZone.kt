@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
  * @param offset timeOffset returned via the corresponding id. ex: "+05:30"
 * */
 data class IvyTimeZone(
-    val id: String,
+    val zoneId: ZoneId,
     val offset: String
 ) {
     companion object {
@@ -29,7 +29,7 @@ data class IvyTimeZone(
         }
 
         fun getDeviceDefault(): IvyTimeZone =
-            ZoneId.systemDefault().id?.toIvyTimeZone() ?: IvyTimeZone("UTC", "Z")
+            ZoneId.systemDefault().id?.toIvyTimeZone() ?: IvyTimeZone(ZoneId.of("UTC"), "Z")
     }
 
 }
@@ -44,7 +44,7 @@ fun String.toIvyTimeZone(): IvyTimeZone? {
         val zone = ZoneId.of(this)
         val offsetToday = OffsetDateTime.now(zone).offset
         val offset = DateTimeFormatter.ofPattern("XXX").format(offsetToday)
-        IvyTimeZone(this, offset)
+        IvyTimeZone(zone, offset)
     }.onFailure {
         Timber.w("Error for zoneId: \"$this\" -> ${it.stackTraceToString()}")
     }.getOrNull()

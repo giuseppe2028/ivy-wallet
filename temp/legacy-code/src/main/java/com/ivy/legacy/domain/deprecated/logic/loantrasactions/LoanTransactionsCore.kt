@@ -28,9 +28,12 @@ import com.ivy.legacy.datamodel.Loan
 import com.ivy.legacy.datamodel.LoanRecord
 import com.ivy.legacy.datamodel.temp.toDomain
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
+import com.ivy.legacy.domain.data.toIvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC
+import com.ivy.legacy.utils.toInstantUTC
 import com.ivy.wallet.domain.deprecated.logic.currency.ExchangeRatesLogic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -113,11 +116,12 @@ class LoanTransactionsCore @Inject constructor(
         selectedAccountId: UUID?,
         title: String? = null,
         category: Category? = null,
-        time: LocalDateTime? = null,
+        time: Instant? = null,
         isLoanRecord: Boolean = false,
         transaction: Transaction? = null,
         loanRecordType: LoanRecordType
     ) {
+        val timeZone = settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault()
         if (isLoanRecord && loanRecordId == null) {
             return
         }
@@ -131,7 +135,7 @@ class LoanTransactionsCore @Inject constructor(
                 selectedAccountId = selectedAccountId,
                 title = title ?: transaction.title,
                 categoryId = category?.id?.value ?: transaction.categoryId,
-                time = time ?: transaction.dateTime ?: timeNowUTC(),
+                time = time ?: transaction.dateTime ?: timeNowUTC().toInstantUTC(timeZone),
                 isLoanRecord = isLoanRecord,
                 transaction = transaction,
                 loanRecordType = loanRecordType
@@ -145,7 +149,7 @@ class LoanTransactionsCore @Inject constructor(
                 selectedAccountId = selectedAccountId,
                 title = title,
                 categoryId = category?.id?.value,
-                time = time ?: timeNowUTC(),
+                time = time ?: timeNowUTC().toInstantUTC(timeZone),
                 isLoanRecord = isLoanRecord,
                 transaction = transaction,
                 loanRecordType = loanRecordType
@@ -163,7 +167,7 @@ class LoanTransactionsCore @Inject constructor(
         selectedAccountId: UUID?,
         title: String? = null,
         categoryId: UUID? = null,
-        time: LocalDateTime = timeNowUTC(),
+        time: Instant = timeNowUTC().toInstantUTC("UTC".toIvyTimeZone()),
         isLoanRecord: Boolean = false,
         transaction: Transaction? = null,
         loanRecordType: LoanRecordType

@@ -1,30 +1,29 @@
 package com.ivy.legacy.utils
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.ivy.base.legacy.stringRes
+import com.ivy.design.api.ivyContext
 import com.ivy.frp.Total
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.ui.R
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-fun timeNowLocal(zone:ZoneId = ZoneOffset.systemDefault()): LocalDateTime = LocalDateTime.now(zone)
+//fun timeNowLocal(zone:ZoneId = ZoneOffset.systemDefault()): LocalDateTime = LocalDateTime.now(zone)
+fun timeNowLocal(zone: IvyTimeZone): ZonedDateTime = ZonedDateTime.now(zone.zoneId)
 
 fun dateNowLocal(): LocalDate = LocalDate.now()
-
-fun getDefaultTimeZone(): ZoneId = ZoneOffset.systemDefault()
-
-fun offesetFormatted(
-
-){
-
-}
 
 @Total
 fun timeNowUTC(): LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
@@ -214,19 +213,21 @@ fun LocalDateTime.convertUTCto(zone: ZoneId): LocalDateTime {
 }
 
 fun LocalTime.convertLocalToUTC(): LocalTime {
-    val offset = timeNowLocal().atZone(ZoneOffset.systemDefault()).offset.totalSeconds.toLong()
+    val offset = timeNowLocal(IvyTimeZone.getDeviceDefault()).offset.totalSeconds.toLong()
     return this.minusSeconds(offset)
 }
 
 fun LocalTime.convertUTCToLocal(): LocalTime {
-    val offset = timeNowLocal().atZone(ZoneOffset.systemDefault()).offset.totalSeconds.toLong()
+    val offset = timeNowLocal(IvyTimeZone.getDeviceDefault()).offset.totalSeconds.toLong()
     return this.plusSeconds(offset)
 }
 
 fun LocalDateTime.convertLocalToUTC(): LocalDateTime {
-    val offset = timeNowLocal().atZone(ZoneOffset.systemDefault()).offset.totalSeconds.toLong()
+    val offset = timeNowLocal(IvyTimeZone.getDeviceDefault()).offset.totalSeconds.toLong()
     return this.minusSeconds(offset)
 }
+
+fun LocalDateTime.toInstantUTC(ivyTimeZone: IvyTimeZone?):Instant = this.toInstant(ZoneOffset.of(ivyTimeZone?.offset))
 
 // The timepicker returns time in UTC, but the date picker returns date in LocalTimeZone
 // hence use this method to get both date & time in UTC
@@ -316,3 +317,4 @@ fun LocalDate.withDayOfMonthSafe(targetDayOfMonth: Int): LocalDate {
         if (targetDayOfMonth > maxDayOfMonth) maxDayOfMonth else targetDayOfMonth
     )
 }
+fun Instant.toLocalDateTimeWithZone(timeZone: IvyTimeZone?): LocalDateTime = ZonedDateTime.ofInstant(this,timeZone?.zoneId).toLocalDateTime()

@@ -18,6 +18,7 @@ import com.ivy.legacy.datamodel.Loan
 import com.ivy.legacy.datamodel.LoanRecord
 import com.ivy.legacy.datamodel.temp.toLegacy
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.domain.deprecated.logic.AccountCreator
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.ioThread
@@ -79,6 +80,8 @@ class LoanDetailsViewModel @Inject constructor(
     private val loanRecordModalData = mutableStateOf<LoanRecordModalData?>(null)
     private val waitModalVisible = mutableStateOf(false)
     private val isDeleteModalVisible = mutableStateOf(false)
+    private val timeZone = mutableStateOf<IvyTimeZone?>(null)
+
     lateinit var screen: LoanDetailsScreen
 
     @Composable
@@ -88,6 +91,7 @@ class LoanDetailsViewModel @Inject constructor(
         }
 
         return LoanDetailsScreenState(
+            timeZone = timeZone.value,
             baseCurrency = baseCurrency.value,
             loan = loan.value,
             displayLoanRecords = displayLoanRecords.value,
@@ -122,6 +126,7 @@ class LoanDetailsViewModel @Inject constructor(
                     selectedAccount = event.displayLoanRecord.account,
                     createLoanRecordTransaction = event.displayLoanRecord.loanRecordTransaction,
                     isLoanInterest = event.displayLoanRecord.loanRecord.interest,
+                    timeZone = event.displayLoanRecord.timeZone,
                     loanAccountCurrencyCode = event.displayLoanRecord.loanCurrencyCode
                 )
             }
@@ -206,7 +211,8 @@ class LoanDetailsViewModel @Inject constructor(
                 loanRecordModalData.value = LoanRecordModalData(
                     loanRecord = null,
                     baseCurrency = baseCurrency.value,
-                    selectedAccount = selectedLoanAccount.value
+                    selectedAccount = selectedLoanAccount.value,
+                    timeZone = timeZone.value
                 )
             }
 

@@ -39,12 +39,17 @@ import com.ivy.frp.test.TestingContext
 import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.LoanRecord
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZone
+import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
 import com.ivy.legacy.legacy.ui.theme.components.DateTimeRow
 import com.ivy.legacy.legacy.ui.theme.modal.ModalNameInput
 import com.ivy.legacy.utils.getDefaultFIATCurrency
 import com.ivy.legacy.utils.onScreenStart
 import com.ivy.legacy.utils.selectEndTextFieldValue
 import com.ivy.legacy.utils.timeNowUTC
+import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toLocalDateTimeWithZone
 import com.ivy.ui.R
 import com.ivy.wallet.domain.deprecated.logic.model.CreateAccountData
 import com.ivy.wallet.domain.deprecated.logic.model.CreateLoanRecordData
@@ -58,6 +63,7 @@ import com.ivy.wallet.ui.theme.modal.edit.AccountModalData
 import com.ivy.wallet.ui.theme.modal.edit.AmountModal
 import com.ivy.wallet.ui.theme.toComposeColor
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -65,6 +71,7 @@ import java.util.UUID
 data class LoanRecordModalData(
     val loanRecord: LoanRecord?,
     val baseCurrency: String,
+    val timeZone:IvyTimeZone?,
     val loanAccountCurrencyCode: String? = null,
     val selectedAccount: Account? = null,
     val createLoanRecordTransaction: Boolean = false,
@@ -95,7 +102,7 @@ fun BoxWithConstraintsScope.LoanRecordModal(
         mutableStateOf(modal?.loanRecord?.amount ?: 0.0)
     }
     var dateTime by remember(modal) {
-        mutableStateOf(modal?.loanRecord?.dateTime ?: timeNowUTC())
+        mutableStateOf(modal?.loanRecord?.dateTime ?: timeNowUTC().toInstantUTC("UTC".toIvyTimeZoneOrDefault()))
     }
     var selectedAcc by remember(modal) {
         mutableStateOf(modal?.selectedAccount)
@@ -114,6 +121,9 @@ fun BoxWithConstraintsScope.LoanRecordModal(
     }
     var loanRecordType by remember(modal) {
         mutableStateOf(modal?.loanRecord?.loanRecordType ?: LoanRecordType.DECREASE)
+    }
+    var timeZone by remember(modal) {
+        mutableStateOf(modal?.timeZone ?: "UTC".toIvyTimeZone())
     }
 
     var amountModalVisible by remember { mutableStateOf(false) }
@@ -202,9 +212,9 @@ fun BoxWithConstraintsScope.LoanRecordModal(
         Spacer(Modifier.height(24.dp))
 
         DateTimeRow(
-            dateTime = dateTime,
+            dateTime = dateTime.toLocalDateTimeWithZone(timeZone),
             onSetDateTime = {
-                dateTime = it
+                dateTime = it.toInstantUTC(timeZone)
             }
         )
 
@@ -381,7 +391,7 @@ private fun save(
     loanRecord: LoanRecord?,
     noteTextFieldValue: TextFieldValue,
     amount: Double,
-    dateTime: LocalDateTime,
+    dateTime: Instant,
     loanRecordInterest: Boolean = false,
     createLoanRecordTransaction: Boolean = false,
     selectedAccount: Account? = null,
@@ -661,7 +671,8 @@ private fun Preview() {
         LoanRecordModal(
             modal = LoanRecordModalData(
                 loanRecord = null,
-                baseCurrency = "BGN"
+                baseCurrency = "BGN",
+                timeZone = "UTC".toIvyTimeZone()
             ),
             onCreate = {},
             onEdit = {},
