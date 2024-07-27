@@ -40,8 +40,8 @@ import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.LoanRecord
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.legacy.ui.theme.components.DateTimeRow
 import com.ivy.legacy.legacy.ui.theme.modal.ModalNameInput
 import com.ivy.legacy.utils.getDefaultFIATCurrency
@@ -64,7 +64,6 @@ import com.ivy.wallet.ui.theme.modal.edit.AmountModal
 import com.ivy.wallet.ui.theme.toComposeColor
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")

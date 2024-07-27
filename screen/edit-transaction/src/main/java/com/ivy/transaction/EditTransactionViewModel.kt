@@ -26,13 +26,12 @@ import com.ivy.data.repository.TagRepository
 import com.ivy.data.repository.TransactionRepository
 import com.ivy.data.repository.mapper.TagMapper
 import com.ivy.data.repository.mapper.TransactionMapper
-import com.ivy.design.api.ivyContext
 import com.ivy.domain.features.Features
 import com.ivy.legacy.data.EditTransactionDisplayLoan
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.temp.toDomain
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.domain.deprecated.logic.AccountCreator
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.convertUTCToLocal
@@ -696,7 +695,7 @@ class EditTransactionViewModel @Inject constructor(
                     dateTime = when {
                         loadedTransaction().dateTime == null &&
                                 dueDate.value == null -> {
-                            timeNowLocal(getTimeZone()).toLocalDateTime().toInstantUTC(timezone.value)
+                            timeNowLocal(getTimeZone()).toInstant()
                         }
 
                         else -> loadedTransaction().dateTime

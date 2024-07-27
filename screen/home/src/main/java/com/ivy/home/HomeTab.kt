@@ -41,14 +41,12 @@ import com.ivy.legacy.data.model.MainTab
 import com.ivy.legacy.data.model.Month
 import com.ivy.legacy.data.model.TimePeriod
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.legacy.ivyWalletCtx
 import com.ivy.legacy.ui.component.transaction.TransactionsDividerLine
 import com.ivy.legacy.ui.component.transaction.transactions
 import com.ivy.legacy.utils.horizontalSwipeListener
 import com.ivy.legacy.utils.rememberSwipeListenerState
 import com.ivy.legacy.utils.verticalSwipeListener
-import com.ivy.navigation.IvyPreview
 import com.ivy.navigation.screenScopedViewModel
 import com.ivy.ui.R
 import com.ivy.ui.rememberScrollPositionListState
@@ -389,13 +387,14 @@ fun HomeLazyColumn(
 @Preview
 @Composable
 private fun BoxWithConstraintsScope.PreviewHomeTab(isDark: Boolean = false) {
-    IvyPreview(isDark) {
+    IvyWalletPreview() {
         HomeUi(
             uiState = HomeState(
                 theme = Theme.AUTO,
                 name = "",
                 baseData = AppBaseData(
                     baseCurrency = "",
+                    timeZone = IvyTimeZone.getDeviceDefault(),
                     accounts = persistentListOf(),
                     categories = persistentListOf(),
                 ),
@@ -420,9 +419,7 @@ private fun BoxWithConstraintsScope.PreviewHomeTab(isDark: Boolean = false) {
                 period = TimePeriod(month = Month.monthsList().first(), year = 2023),
                 hideBalance = false,
                 hideIncome = false,
-                expanded = false,
-                //TODO fix this
-                timeZone = "UTC".toIvyTimeZone()
+                expanded = false
             ),
             onEvent = {}
         )

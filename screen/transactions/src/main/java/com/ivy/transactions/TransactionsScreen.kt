@@ -51,7 +51,6 @@ import com.ivy.legacy.data.model.Month
 import com.ivy.legacy.data.model.TimePeriod
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.legacy.ivyWalletCtx
 import com.ivy.legacy.ui.component.IncomeExpensesCards
 import com.ivy.legacy.ui.component.ItemStatisticToolbar
@@ -120,6 +119,7 @@ fun BoxWithConstraintsScope.TransactionsScreen(screen: TransactionsScreen) {
         period = uiState.period,
         baseCurrency = uiState.baseCurrency,
         currency = uiState.currency,
+        timeZone = uiState.timeZone,
 
         categories = uiState.categories,
         accounts = uiState.accounts,
@@ -211,6 +211,7 @@ private fun BoxWithConstraintsScope.UI(
     period: TimePeriod,
     baseCurrency: String,
     currency: String,
+    timeZone: IvyTimeZone,
     skipAllModalVisible: Boolean,
     onSkipAllModalVisible: (Boolean) -> Unit,
 
@@ -378,9 +379,10 @@ private fun BoxWithConstraintsScope.UI(
 
             transactions(
                 baseData = AppBaseData(
-                    baseCurrency,
-                    accounts,
-                    categories
+                    baseCurrency = baseCurrency,
+                    timeZone = timeZone,
+                    accounts = accounts,
+                    categories = categories
                 ),
                 upcoming = LegacyDueSection(
                     trns = upcoming,
@@ -820,6 +822,7 @@ private fun BoxWithConstraintsScope.Preview_empty() {
             ), // preview
             baseCurrency = "BGN",
             currency = "BGN",
+            timeZone = IvyTimeZone.getDeviceDefault(),
 
             categories = persistentListOf(),
             accounts = persistentListOf(),
@@ -861,6 +864,7 @@ private fun BoxWithConstraintsScope.Preview_crypto() {
             ), // preview
             baseCurrency = "BGN",
             currency = "ADA",
+            timeZone = IvyTimeZone.getDeviceDefault(),
 
             categories = persistentListOf(),
             accounts = persistentListOf(),
@@ -905,6 +909,7 @@ private fun BoxWithConstraintsScope.Preview_empty_upcoming() {
             period = TimePeriod(month = Month.monthsList().first(), year = 2023),
             baseCurrency = "BGN",
             currency = "BGN",
+            timeZone = IvyTimeZone.getDeviceDefault(),
 
             categories = persistentListOf(),
             accounts = persistentListOf(),

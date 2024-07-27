@@ -6,14 +6,15 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.ivy.base.legacy.TransactionHistoryItem
-import com.ivy.data.model.primitive.NotBlankTrimmedString
-import com.ivy.ui.ComposeViewModel
 import com.ivy.data.model.Category
+import com.ivy.data.model.primitive.NotBlankTrimmedString
 import com.ivy.data.repository.CategoryRepository
 import com.ivy.legacy.datamodel.Account
-import com.ivy.legacy.domain.data.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.getDefaultFIATCurrency
 import com.ivy.legacy.utils.ioThread
+import com.ivy.ui.ComposeViewModel
 import com.ivy.wallet.domain.action.account.AccountsAct
 import com.ivy.wallet.domain.action.settings.BaseCurrencyAct
 import com.ivy.wallet.domain.action.settings.SettingsAct
@@ -40,6 +41,7 @@ class SearchViewModel @Inject constructor(
     private val transactions =
         mutableStateOf<ImmutableList<TransactionHistoryItem>>(persistentListOf())
     private val baseCurrency = mutableStateOf<String>(getDefaultFIATCurrency().currencyCode)
+    private val timeZone = mutableStateOf(IvyTimeZone.getDeviceDefault())
     private val accounts = mutableStateOf<ImmutableList<Account>>(persistentListOf())
     private val categories = mutableStateOf<ImmutableList<Category>>(persistentListOf())
     private val searchQuery = mutableStateOf("")
@@ -56,7 +58,7 @@ class SearchViewModel @Inject constructor(
             baseCurrency = baseCurrency.value,
             accounts = accounts.value,
             categories = categories.value,
-            timeZone = "UTC".toIvyTimeZone()
+            timeZone = timeZone.value
         )
     }
 
@@ -87,6 +89,7 @@ class SearchViewModel @Inject constructor(
 
             transactions.value = queryResult
             baseCurrency.value = baseCurrencyAct(Unit)
+            timeZone.value = ioThread { settings.getSettings().timeZoneId.toIvyTimeZoneOrDefault() }
             accounts.value = accountsAct(Unit)
             categories.value = categoryRepository.findAll().toImmutableList()
         }

@@ -1,6 +1,5 @@
 package com.ivy.settings
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -50,7 +49,7 @@ import com.ivy.design.utils.thenIf
 import com.ivy.legacy.Constants
 import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
 import com.ivy.legacy.legacy.ui.theme.modal.TimeZoneModal
 import com.ivy.legacy.rootScreen
 import com.ivy.legacy.utils.drawColoredShadow

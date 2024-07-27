@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.ivy.base.legacy.Theme
 import com.ivy.design.utils.IvyComponentPreview
 import com.ivy.legacy.data.AppBaseData
-import com.ivy.legacy.domain.data.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.ui.SearchInput
 import com.ivy.legacy.ui.component.transaction.transactions
 import com.ivy.legacy.utils.densityScope
@@ -94,6 +94,7 @@ private fun SearchUi(
             transactions(
                 baseData = AppBaseData(
                     baseCurrency = uiState.baseCurrency,
+                    timeZone = uiState.timeZone,
                     accounts = uiState.accounts,
                     categories = uiState.categories
                 ),
@@ -135,7 +136,7 @@ private fun Preview(isDark: Boolean = false) {
                 baseCurrency = "",
                 accounts = persistentListOf(),
                 categories = persistentListOf(),
-                timeZone = "UTC".toIvyTimeZone()
+                timeZone = IvyTimeZone.getDeviceDefault()
             ),
             onEvent = {}
         )

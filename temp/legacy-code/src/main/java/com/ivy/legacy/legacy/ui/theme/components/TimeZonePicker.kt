@@ -53,7 +53,7 @@ import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.IvyWalletComponentPreview
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.addKeyboardListener
 import com.ivy.legacy.utils.clickableNoIndication
 import com.ivy.legacy.utils.computationThread
@@ -70,7 +70,6 @@ import com.ivy.wallet.ui.theme.White
 import com.ivy.wallet.ui.theme.components.IvyIcon
 import com.ivy.wallet.ui.theme.modal.DURATION_MODAL_ANIM
 import com.ivy.wallet.ui.theme.pureBlur
-import java.time.ZoneId
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
 @Suppress("ParameterNaming")
@@ -139,7 +138,6 @@ fun TimeZonePicker(
             },
         ) {
             preselected = false
-            //preselectedTimeZone = com.ivy.legacy.domain.data.IvyTimeZone("id","10")
             selectedTimeZone = it
             onSelectedTimeZoneChanged(it)
         }
@@ -443,7 +441,7 @@ private fun Preview() {
         TimeZonePicker(
             initialSelectedTimeZone = null,
             includeKeyboardShownInsetSpacer = true,
-            preselectedTimeZone = IvyTimeZone(ZoneId.of("Europe/Rome"),"+02:00")
+            preselectedTimeZone = IvyTimeZone.getDeviceDefault()
         ) {}
     }
 }

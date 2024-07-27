@@ -12,7 +12,7 @@ import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
 data class TransactionsState(
-    val timeZone:IvyTimeZone?,
+    val timeZone:IvyTimeZone,
     val period: TimePeriod,
     val baseCurrency: String,
     val currency: String,

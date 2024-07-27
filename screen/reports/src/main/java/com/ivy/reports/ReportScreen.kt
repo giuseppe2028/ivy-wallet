@@ -229,6 +229,7 @@ private fun BoxWithConstraintsScope.UI(
             transactions(
                 baseData = AppBaseData(
                     baseCurrency = state.baseCurrency,
+                    timeZone = state.timeZone,
                     categories = state.categories,
                     accounts = state.accounts,
                 ),

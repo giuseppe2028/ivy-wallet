@@ -28,8 +28,8 @@ import com.ivy.legacy.datamodel.Loan
 import com.ivy.legacy.datamodel.LoanRecord
 import com.ivy.legacy.datamodel.temp.toDomain
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
-import com.ivy.legacy.domain.data.toIvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC
@@ -39,7 +39,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject

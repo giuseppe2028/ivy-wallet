@@ -22,7 +22,7 @@ import com.ivy.legacy.IvyWalletCtx
 import com.ivy.legacy.LogoutLogic
 import com.ivy.legacy.domain.action.settings.UpdateSettingsAct
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.getISOFormattedDateTime
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC

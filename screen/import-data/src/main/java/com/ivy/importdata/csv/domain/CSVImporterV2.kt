@@ -26,7 +26,7 @@ import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
 import com.ivy.legacy.datamodel.toEntity
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.toInstantUTC
 import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.wallet.domain.data.IvyCurrency

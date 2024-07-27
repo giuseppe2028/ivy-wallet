@@ -23,8 +23,6 @@ import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.data.AppBaseData
 import com.ivy.legacy.data.LegacyDueSection
-import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.navigation.EditTransactionScreen
 import com.ivy.navigation.Navigation
 import com.ivy.navigation.navigation
@@ -77,7 +75,6 @@ fun LazyListScope.transactions(
 
     historySection(
         baseData = baseData,
-
         history = history,
         dateDividerMarginTop = dateDividerMarginTop,
         onPayOrGet = onPayOrGet
@@ -215,7 +212,6 @@ private fun LazyListScope.trnItems(
     ) {
         val nav = navigation()
         TransactionCard(
-            timeZone = "UTC".toIvyTimeZone(),
             baseData = baseData,
             transaction = it,
             onPayOrGet = onPayOrGet,
@@ -255,7 +251,6 @@ private fun LazyListScope.historySection(
                     TransactionCard(
                         baseData = baseData,
                         transaction = it,
-                        timeZone = "UTC".toIvyTimeZone(),
                         onPayOrGet = onPayOrGet
                     ) { trn ->
                         onTransactionClick(

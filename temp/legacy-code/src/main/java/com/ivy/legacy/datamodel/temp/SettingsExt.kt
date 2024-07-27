@@ -8,6 +8,6 @@ fun SettingsEntity.toLegacyDomain(): Settings = Settings(
     baseCurrency = currency,
     bufferAmount = bufferAmount.toBigDecimal(),
     name = name,
-    timeZoneOffset = timeZoneId,
+    timeZoneId = timeZoneId,
     id = id
 )

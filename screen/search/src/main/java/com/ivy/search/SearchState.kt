@@ -10,7 +10,7 @@ data class SearchState(
     val searchQuery: String,
     val transactions: ImmutableList<TransactionHistoryItem>,
     val baseCurrency: String,
-    val timeZone: IvyTimeZone?,
+    val timeZone: IvyTimeZone,
     val accounts: ImmutableList<Account>,
     val categories: ImmutableList<Category>
 )

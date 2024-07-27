@@ -2,13 +2,11 @@ package com.ivy.legacy.data.model
 
 import androidx.compose.runtime.Immutable
 import com.ivy.base.legacy.Transaction
-import com.ivy.legacy.domain.data.toIvyTimeZone
 import com.ivy.legacy.utils.beginningOfIvyTime
 import com.ivy.legacy.utils.dateNowUTC
 import com.ivy.legacy.utils.formatDateOnly
 import com.ivy.legacy.utils.startOfDayNowUTC
 import com.ivy.legacy.utils.timeNowUTC
-import com.ivy.legacy.utils.toInstantUTC
 import com.ivy.legacy.utils.toIvyFutureTime
 import com.ivy.wallet.domain.pure.data.ClosedTimeRange
 import java.time.LocalDateTime

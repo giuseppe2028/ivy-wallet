@@ -24,7 +24,7 @@ import com.ivy.design.l0_system.IvyDark
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
 import com.ivy.legacy.datamodel.toEntity
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.convertLocalToUTC
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC

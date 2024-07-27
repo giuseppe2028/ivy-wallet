@@ -49,16 +49,13 @@ import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.data.AppBaseData
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
 import com.ivy.legacy.utils.capitalizeLocal
-import com.ivy.legacy.utils.dateNowUTC
 import com.ivy.legacy.utils.format
 import com.ivy.legacy.utils.formatNicely
 import com.ivy.legacy.utils.isNotNullOrBlank
 import com.ivy.legacy.utils.timeNowUTC
 import com.ivy.legacy.utils.toInstantUTC
-import com.ivy.legacy.utils.toLocalDateTimeWithZone
 import com.ivy.navigation.Navigation
 import com.ivy.navigation.TransactionsScreen
 import com.ivy.navigation.navigation
@@ -87,14 +84,13 @@ import com.ivy.wallet.ui.theme.wallet.AmountCurrencyB1
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import java.time.Instant
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
 @Composable
 fun TransactionCard(
     baseData: AppBaseData,
-    timeZone: IvyTimeZone?,
     transaction: Transaction,
 
     onPayOrGet: (Transaction) -> Unit,
@@ -141,10 +137,10 @@ fun TransactionCard(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 text = stringResource(
                     R.string.due_on,
-                    transaction.dueDate!!.toLocalDateTimeWithZone(timeZone).formatNicely()
+                    transaction.dueDate!!.formatNicely(timeZone = baseData.timeZone)
                 ).uppercase(),
                 style = UI.typo.nC.style(
-                    color = if (transaction.dueDate!!.isAfter(timeNowUTC().toInstantUTC(timeZone))) {
+                    color = if (transaction.dueDate!!.isAfter(Instant.now())) {
                         Orange
                     } else {
                         UI.colors.gray
@@ -171,7 +167,7 @@ fun TransactionCard(
             )
         }
 
-        val description = getTransactionDescription(transaction,timeZone)
+        val description = getTransactionDescription(transaction, baseData.timeZone)
         if (!description.isNullOrBlank()) {
             Spacer(Modifier.height(if (transaction.title.isNotNullOrBlank()) 4.dp else 8.dp))
             Text(
@@ -194,7 +190,7 @@ fun TransactionCard(
 
         TypeAmountCurrency(
             transactionType = transaction.type,
-            dueDate = transaction.dueDate?.toLocalDateTimeWithZone(timeZone),
+            dueDate = transaction.dueDate,
             currency = transactionCurrency,
             amount = transaction.amount.toDouble()
         )
@@ -374,18 +370,17 @@ fun CategoryBadgeDisplay(
 }
 
 @Composable
-private fun getTransactionDescription(transaction: Transaction,timeZone: IvyTimeZone?): String? {
-    val paidFor = transaction.paidFor?.toLocalDateTimeWithZone(timeZone)
+private fun getTransactionDescription(transaction: Transaction, timeZone: IvyTimeZone): String? {
+    val paidFor = transaction.paidFor?.let { ZonedDateTime.ofInstant(it, timeZone.zoneId) }
     return when {
         transaction.description.isNotNullOrBlank() -> transaction.description!!
-        transaction.recurringRuleId != null &&
-                transaction.dueDate == null &&
-                paidFor != null -> stringResource(
-            R.string.bill_paid,
-            paidFor.month.name.lowercase().capitalizeLocal(),
-            transaction.paidFor!!.toLocalDateTimeWithZone(timeZone).year.toString()
-        )
-
+        transaction.recurringRuleId != null && transaction.dueDate == null && paidFor != null -> {
+            stringResource(
+                R.string.bill_paid,
+                paidFor.month.name.lowercase().capitalizeLocal(),
+                paidFor.year.toString()
+            )
+        }
         else -> null
     }
 }
@@ -406,7 +401,8 @@ private fun TransactionBadge(
             .background(backgroundColor, UI.shapes.rFull)
             .clickable {
                 onClick()
-            }.padding(end = 10.dp),
+            }
+            .padding(end = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         SpacerHor(width = 8.dp)
@@ -496,7 +492,7 @@ private fun TransferHeader(
 @Composable
 fun TypeAmountCurrency(
     transactionType: TransactionType,
-    dueDate: LocalDateTime?,
+    dueDate: Instant?,
     currency: String,
     amount: Double,
     modifier: Modifier = Modifier
@@ -519,7 +515,7 @@ fun TypeAmountCurrency(
 
             TransactionType.EXPENSE -> {
                 when {
-                    dueDate != null && dueDate.isAfter(timeNowUTC()) -> {
+                    dueDate != null && dueDate.isAfter(Instant.now()) -> {
                         // Upcoming Expense
                         AmountTypeStyle(
                             icon = R.drawable.ic_expense,
@@ -529,7 +525,7 @@ fun TypeAmountCurrency(
                         )
                     }
 
-                    dueDate != null && dueDate.isBefore(dateNowUTC().atStartOfDay()) -> {
+                    dueDate != null && dueDate.isBefore(Instant.now()) -> {
                         // Overdue Expense
                         AmountTypeStyle(
                             icon = R.drawable.ic_overdue,
@@ -609,6 +605,7 @@ private fun PreviewUpcomingExpense() {
                 TransactionCard(
                     baseData = AppBaseData(
                         baseCurrency = "BGN",
+                        timeZone = IvyTimeZone.getDeviceDefault(),
                         categories = persistentListOf(food),
                         accounts = persistentListOf(cash),
                     ),
@@ -621,7 +618,6 @@ private fun PreviewUpcomingExpense() {
                         dateTime = null,
                         type = TransactionType.EXPENSE,
                     ),
-                    timeZone = timeZone,
                     onPayOrGet = {},
                 ) {
                 }
@@ -651,6 +647,7 @@ private fun PreviewUpcomingExpenseBadgeSecondRow() {
                 TransactionCard(
                     baseData = AppBaseData(
                         baseCurrency = "BGN",
+                        timeZone = IvyTimeZone.getDeviceDefault(),
                         categories = persistentListOf(food),
                         accounts = persistentListOf(cash),
                     ),
@@ -663,7 +660,6 @@ private fun PreviewUpcomingExpenseBadgeSecondRow() {
                         dateTime = null,
                         type = TransactionType.EXPENSE,
                     ),
-                    timeZone = timeZone,
                     onPayOrGet = {},
                 ) {
                 }
@@ -693,6 +689,7 @@ private fun PreviewOverdueExpense() {
                 TransactionCard(
                     baseData = AppBaseData(
                         baseCurrency = "BGN",
+                        timeZone = IvyTimeZone.getDeviceDefault(),
                         categories = persistentListOf(food),
                         accounts = persistentListOf(cash),
                     ),
@@ -705,7 +702,6 @@ private fun PreviewOverdueExpense() {
                         dateTime = null,
                         type = TransactionType.EXPENSE
                     ),
-                    timeZone = timeZone,
                     onPayOrGet = {},
                 ) {
                 }
@@ -735,6 +731,7 @@ private fun PreviewNormalExpense() {
                 TransactionCard(
                     baseData = AppBaseData(
                         baseCurrency = "BGN",
+                        timeZone = IvyTimeZone.getDeviceDefault(),
                         categories = persistentListOf(food),
                         accounts = persistentListOf(cash),
                     ),
@@ -746,7 +743,6 @@ private fun PreviewNormalExpense() {
                         dateTime = timeNowUTC().toInstantUTC(timeZone),
                         type = TransactionType.EXPENSE
                     ),
-                    timeZone = timeZone,
                     onPayOrGet = {},
                 ) {
                 }
@@ -776,6 +772,7 @@ private fun PreviewIncome() {
                 TransactionCard(
                     baseData = AppBaseData(
                         baseCurrency = "BGN",
+                        timeZone = IvyTimeZone.getDeviceDefault(),
                         categories = persistentListOf(category),
                         accounts = persistentListOf(cash),
                     ),
@@ -787,7 +784,6 @@ private fun PreviewIncome() {
                         dateTime = timeNowUTC().toInstantUTC(timeZone),
                         type = TransactionType.INCOME
                     ),
-                    timeZone = timeZone,
                     onPayOrGet = {},
                 ) {
                 }
@@ -809,6 +805,7 @@ private fun PreviewTransfer() {
                 TransactionCard(
                     baseData = AppBaseData(
                         baseCurrency = "BGN",
+                        timeZone = IvyTimeZone.getDeviceDefault(),
                         categories = persistentListOf(),
                         accounts = persistentListOf(acc1, acc2),
                     ),
@@ -820,7 +817,6 @@ private fun PreviewTransfer() {
                         dateTime = timeNowUTC().toInstantUTC(timeZone),
                         type = TransactionType.TRANSFER
                     ),
-                    timeZone = timeZone,
                     onPayOrGet = {},
                 ) {
                 }
@@ -847,6 +843,7 @@ private fun PreviewTransfer_differentCurrency() {
                 TransactionCard(
                     baseData = AppBaseData(
                         baseCurrency = "BGN",
+                        timeZone = IvyTimeZone.getDeviceDefault(),
                         categories = persistentListOf(),
                         accounts = persistentListOf(acc1, acc2),
                     ),
@@ -859,7 +856,6 @@ private fun PreviewTransfer_differentCurrency() {
                         dateTime = timeNowUTC().toInstantUTC(timeZone),
                         type = TransactionType.TRANSFER
                     ),
-                    timeZone = timeZone,
                     onPayOrGet = {},
                 ) {
                 }

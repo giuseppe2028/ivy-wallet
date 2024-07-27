@@ -6,8 +6,7 @@ import com.ivy.data.repository.TransactionRepository
 import com.ivy.data.repository.mapper.TransactionMapper
 import com.ivy.legacy.datamodel.PlannedPaymentRule
 import com.ivy.legacy.datamodel.temp.toDomain
-import com.ivy.legacy.domain.data.toIvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
 import com.ivy.legacy.incrementDate
 import com.ivy.legacy.utils.toInstantUTC
 import java.time.LocalDateTime

@@ -12,6 +12,7 @@ import com.ivy.base.legacy.LegacyTransaction
 import com.ivy.base.legacy.TransactionHistoryItem
 import com.ivy.base.legacy.stringRes
 import com.ivy.base.model.TransactionType
+import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.model.Category
 import com.ivy.data.model.CategoryId
 import com.ivy.data.model.Expense
@@ -34,6 +35,8 @@ import com.ivy.frp.filterSuspend
 import com.ivy.legacy.IvyWalletCtx
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.temp.toLegacy
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.getISOFormattedDateTime
 import com.ivy.legacy.utils.scopedIOThread
 import com.ivy.legacy.utils.timeNowUTC
@@ -84,6 +87,7 @@ class ReportViewModel @Inject constructor(
     private val transactionMapper: TransactionMapper,
     private val tagRepository: TagRepository,
     private val exportCsvUseCase: ExportCsvUseCase,
+    private val settingsDao: SettingsDao
 ) : ComposeViewModel<ReportScreenState, ReportScreenEvent>() {
     private val unSpecifiedCategory =
         Category(
@@ -96,6 +100,7 @@ class ReportViewModel @Inject constructor(
             removed = false,
         )
     private val baseCurrency = mutableStateOf("")
+    private val timeZone = mutableStateOf(IvyTimeZone.getDeviceDefault())
     private val categories = mutableStateOf<ImmutableList<Category>>(persistentListOf())
     private val historyIncomeExpense = mutableStateOf(IncomeExpenseTransferPair.zero())
     private val filter = mutableStateOf<ReportFilter?>(null)
@@ -154,7 +159,8 @@ class ReportViewModel @Inject constructor(
             upcomingExpenses = upcomingExpenses.doubleValue,
             upcomingIncome = upcomingIncome.doubleValue,
             upcomingTransactions = upcomingTransactions.value,
-            allTags = allTags.value
+            allTags = allTags.value,
+            timeZone = timeZone.value
         )
     }
 
@@ -203,6 +209,7 @@ class ReportViewModel @Inject constructor(
     private fun start() {
         viewModelScope.launch(Dispatchers.IO) {
             baseCurrency.value = baseCurrencyAct(Unit)
+            timeZone.value = settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault()
             accounts.value = accountsAct(Unit)
             categories.value =
                 (listOf(unSpecifiedCategory) + categoryRepository.findAll()).toImmutableList()

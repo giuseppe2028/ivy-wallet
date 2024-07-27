@@ -13,7 +13,7 @@ data class Settings(
     val baseCurrency: String,
     val bufferAmount: BigDecimal,
     val name: String,
-    val timeZoneOffset: String?,
+    val timeZoneId: String?,
     val id: UUID = UUID.randomUUID()
 ) {
     fun toEntity(): SettingsEntity = SettingsEntity(
@@ -21,7 +21,7 @@ data class Settings(
         currency = baseCurrency,
         bufferAmount = bufferAmount.toDouble(),
         name = name,
-        timeZoneId = timeZoneOffset,
+        timeZoneId = timeZoneId,
         id = id
     )
 }

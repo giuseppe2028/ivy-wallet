@@ -1,6 +1,5 @@
 package com.ivy.legacy.legacy.ui.theme.modal
 
-import android.util.Log
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +27,6 @@ import com.ivy.legacy.legacy.ui.theme.components.TimeZonePicker
 import com.ivy.wallet.ui.theme.modal.IvyModal
 import com.ivy.wallet.ui.theme.modal.ModalSave
 import com.ivy.wallet.ui.theme.modal.ModalTitle
-import java.time.ZoneId
 import java.util.UUID
 
 
@@ -111,7 +109,7 @@ private fun Preview() {
     IvyWalletPreview {
         TimeZoneModal(
             title = "Set TimeZone",
-            initialTimeZone = IvyTimeZone(ZoneId.of("Africa/Accra"), "+00:00"),
+            initialTimeZone = IvyTimeZone.getDeviceDefault(),
             visible = true,
             dismiss = {},
             onSetTimeZone = {}

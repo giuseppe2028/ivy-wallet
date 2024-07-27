@@ -1,17 +1,18 @@
 package com.ivy.reports
 
-import com.ivy.data.model.Transaction
 import com.ivy.base.legacy.TransactionHistoryItem
 import com.ivy.data.model.Category
 import com.ivy.data.model.Tag
 import com.ivy.legacy.datamodel.Account
+import com.ivy.legacy.domain.data.IvyTimeZone
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import java.util.*
+import java.util.UUID
 
 @Suppress("DataClassDefaultValues")
 data class ReportScreenState(
     val baseCurrency: String = "",
+    val timeZone: IvyTimeZone = IvyTimeZone.getDeviceDefault(),
     val balance: Double = 0.0,
     val income: Double = 0.0,
     val expenses: Double = 0.0,

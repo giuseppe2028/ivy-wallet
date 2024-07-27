@@ -135,7 +135,7 @@ class OnboardingViewModel @Inject constructor(
                         baseCurrency = defaultCurrency.code,
                         bufferAmount = 1000.0.toBigDecimal(),
                         //TODO Adjust this part
-                        timeZoneOffset = "GMT"
+                        timeZoneId = "GMT"
                     ).toEntity()
                 )
             }

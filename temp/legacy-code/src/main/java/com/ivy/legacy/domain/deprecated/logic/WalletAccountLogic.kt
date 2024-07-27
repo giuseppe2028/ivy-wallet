@@ -16,8 +16,7 @@ import com.ivy.legacy.data.model.filterOverdue
 import com.ivy.legacy.data.model.filterUpcoming
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.temp.toDomain
-import com.ivy.legacy.domain.data.toIvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZoneOrDefault
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
 import com.ivy.legacy.utils.timeNowUTC
 import com.ivy.legacy.utils.toInstantUTC
 import com.ivy.wallet.domain.action.viewmodel.account.AccountDataAct

@@ -35,7 +35,7 @@ import com.ivy.legacy.data.model.toCloseTimeRange
 import com.ivy.legacy.datamodel.temp.toImmutableLegacyTags
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.domain.deprecated.logic.AccountCreator
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.dateNowUTC
@@ -109,7 +109,7 @@ class TransactionsViewModel @Inject constructor(
     private val balanceBaseCurrency = mutableStateOf<Double?>(null)
     private val income = mutableDoubleStateOf(0.0)
     private val expenses = mutableDoubleStateOf(0.0)
-    private val timeZone = mutableStateOf<IvyTimeZone?>(null)
+    private val timeZone = mutableStateOf(IvyTimeZone.getDeviceDefault())
     // Upcoming
     private val upcoming = mutableStateOf<ImmutableList<Transaction>>(persistentListOf())
     private val upcomingIncome = mutableDoubleStateOf(0.0)
@@ -175,7 +175,7 @@ class TransactionsViewModel @Inject constructor(
     }
 
     @Composable
-    private fun getTimeZone(): IvyTimeZone? {
+    private fun getTimeZone(): IvyTimeZone {
         return timeZone.value
     }
 
@@ -848,7 +848,7 @@ class TransactionsViewModel @Inject constructor(
             baseCurrency.value = baseCurrencyValue
             currency.value = baseCurrency.value
 
-            timeZone.value = settingsDao.findFirst().timeZoneId?.toIvyTimeZone()
+            timeZone.value = ioThread { settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault() }
 
             categories.value = categoryRepository.findAll().toImmutableList()
             accounts.value = accountsAct(Unit)
