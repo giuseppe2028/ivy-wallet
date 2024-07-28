@@ -28,12 +28,11 @@ import com.ivy.legacy.datamodel.Loan
 import com.ivy.legacy.datamodel.LoanRecord
 import com.ivy.legacy.datamodel.temp.toDomain
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
-import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
 import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import com.ivy.wallet.domain.deprecated.logic.currency.ExchangeRatesLogic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -134,7 +133,7 @@ class LoanTransactionsCore @Inject constructor(
                 selectedAccountId = selectedAccountId,
                 title = title ?: transaction.title,
                 categoryId = category?.id?.value ?: transaction.categoryId,
-                time = time ?: transaction.dateTime ?: timeNowUTC().toInstantUTC(timeZone),
+                time = time ?: transaction.dateTime ?: timeNowUTC().toInstant(timeZone),
                 isLoanRecord = isLoanRecord,
                 transaction = transaction,
                 loanRecordType = loanRecordType
@@ -148,7 +147,7 @@ class LoanTransactionsCore @Inject constructor(
                 selectedAccountId = selectedAccountId,
                 title = title,
                 categoryId = category?.id?.value,
-                time = time ?: timeNowUTC().toInstantUTC(timeZone),
+                time = time ?: timeNowUTC().toInstant(timeZone),
                 isLoanRecord = isLoanRecord,
                 transaction = transaction,
                 loanRecordType = loanRecordType
@@ -166,7 +165,7 @@ class LoanTransactionsCore @Inject constructor(
         selectedAccountId: UUID?,
         title: String? = null,
         categoryId: UUID? = null,
-        time: Instant = timeNowUTC().toInstantUTC("UTC".toIvyTimeZone()),
+        time: Instant = timeNowUTC().toInstant("UTC".toIvyTimeZoneOrDefault()), // FIXME urgently
         isLoanRecord: Boolean = false,
         transaction: Transaction? = null,
         loanRecordType: LoanRecordType

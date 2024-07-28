@@ -7,10 +7,11 @@ import com.ivy.data.model.Tag
 import com.ivy.data.model.TagId
 import com.ivy.legacy.data.EditTransactionDisplayLoan
 import com.ivy.legacy.datamodel.Account
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.wallet.domain.data.CustomExchangeRateState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Immutable
 data class EditTransactionState(
@@ -18,9 +19,10 @@ data class EditTransactionState(
     val initialTitle: String?,
     val titleSuggestions: ImmutableSet<String>,
     val currency: String,
+    val timeZone: IvyTimeZone,
     val description: String?,
-    val dateTime: LocalDateTime?,
-    val dueDate: LocalDateTime?,
+    val dateTime: Instant?,
+    val dueDate: Instant?,
     val accounts: ImmutableList<Account>,
     val categories: ImmutableList<Category>,
     val account: Account?,

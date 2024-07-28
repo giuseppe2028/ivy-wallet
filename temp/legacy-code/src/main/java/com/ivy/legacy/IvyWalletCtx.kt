@@ -6,13 +6,14 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.ivy.design.IvyContext
 import com.ivy.base.legacy.SharedPrefs
 import com.ivy.data.model.Category
+import com.ivy.design.IvyContext
 import com.ivy.legacy.datamodel.Account
+import com.ivy.legacy.domain.data.IvyTimeZone
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -114,7 +115,7 @@ class IvyWalletCtx @Inject constructor() : IvyContext() {
         initialDate: LocalDate?,
         onDatePicked: (LocalDate) -> Unit
     ) -> Unit
-    lateinit var onShowTimePicker: (onDatePicked: (LocalTime) -> Unit) -> Unit
+    lateinit var onShowTimePicker: (IvyTimeZone, onDatePicked: (LocalTime) -> Unit) -> Unit
 
     @Deprecated("Legacy code. Don't use it, please.")
     fun datePicker(
@@ -127,8 +128,8 @@ class IvyWalletCtx @Inject constructor() : IvyContext() {
     }
 
     @Deprecated("Legacy code. Don't use it, please.")
-    fun timePicker(onTimePicked: (LocalTime) -> Unit) {
-        onShowTimePicker(onTimePicked)
+    fun timePicker(tz: IvyTimeZone, onTimePicked: (LocalTime) -> Unit) {
+        onShowTimePicker(tz, onTimePicked)
     }
     // Activity help -------------------------------------------------------------------------------
 

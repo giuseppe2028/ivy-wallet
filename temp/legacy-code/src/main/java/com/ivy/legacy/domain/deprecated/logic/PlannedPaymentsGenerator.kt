@@ -6,9 +6,9 @@ import com.ivy.data.repository.TransactionRepository
 import com.ivy.data.repository.mapper.TransactionMapper
 import com.ivy.legacy.datamodel.PlannedPaymentRule
 import com.ivy.legacy.datamodel.temp.toDomain
-import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.incrementDate
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -87,7 +87,7 @@ class PlannedPaymentsGenerator @Inject constructor(
                 amount = rule.amount.toBigDecimal(),
                 title = rule.title,
                 description = rule.description,
-                dueDate = dueDate.toInstantUTC(settingsDao.findFirst().timeZoneId?.toIvyTimeZone()),
+                dueDate = dueDate.toInstant(settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault()),
                 dateTime = null,
                 toAccountId = null,
                 isSynced = false

@@ -5,6 +5,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.ivy.base.legacy.stringRes
 import com.ivy.frp.Total
 import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.ui.R
 import java.time.Instant
 import java.time.LocalDate
@@ -14,13 +15,13 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjuster
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 //fun timeNowLocal(zone:ZoneId = ZoneOffset.systemDefault()): LocalDateTime = LocalDateTime.now(zone)
-fun timeNowLocal(zone: IvyTimeZone): ZonedDateTime = ZonedDateTime.now(zone.zoneId)
 
-fun Instant.toLocalDateTimeWithZone(timeZone: IvyTimeZone?): LocalDateTime = ZonedDateTime.ofInstant(this,timeZone?.zoneId).toLocalDateTime()
+fun Instant.toLocalDateTimeWithZone(timeZone: IvyTimeZone?): LocalDateTime = ZonedDateTime.ofInstant(this,timeZone?.zoneId).toLocalDateTime() // FIXME remove later
 
 fun dateNowLocal(): LocalDate = LocalDate.now()
 
@@ -79,48 +80,6 @@ fun LocalDateTime.formatNicely(
                 this.formatLocal("EEE, dd MMM", zone)
             } else {
                 this.formatLocal("dd MMM, yyyy", zone)
-            }
-        }
-    }
-}
-
-fun Instant.formatNicely(
-    noWeekDay: Boolean = false,
-    timeZone: IvyTimeZone
-): String {
-    val targetTime = ZonedDateTime.ofInstant(this, timeZone.zoneId)
-    val todayTime = ZonedDateTime.ofInstant(Instant.now(), timeZone.zoneId)
-    val todayDate = todayTime.toLocalDate()
-
-    val isThisYear = todayTime.year == targetTime.year
-    val patternNoWeekDay = "dd MMM"
-
-    if (noWeekDay) {
-        return if (isThisYear) {
-            targetTime.formatLocal(patternNoWeekDay)
-        } else {
-            targetTime.formatLocal("dd MMM, yyyy")
-        }
-    }
-
-    return when (targetTime.toLocalDate()) {
-        todayDate -> {
-            stringRes(R.string.today_date, targetTime.formatLocal(patternNoWeekDay))
-        }
-
-        todayDate.minusDays(1) -> {
-            stringRes(R.string.yesterday_date, targetTime.formatLocal(patternNoWeekDay))
-        }
-
-        todayDate.plusDays(1) -> {
-            stringRes(R.string.tomorrow_date, targetTime.formatLocal(patternNoWeekDay))
-        }
-
-        else -> {
-            if (isThisYear) {
-                targetTime.formatLocal("EEE, dd MMM")
-            } else {
-                targetTime.formatLocal("dd MMM, yyyy")
             }
         }
     }
@@ -237,16 +196,6 @@ fun LocalDateTime.formatLocal(
     )
 }
 
-fun ZonedDateTime.formatLocal(
-    pattern: String = "dd MMM yyyy, HH:mm"
-): String {
-    return this.format(
-        DateTimeFormatter
-            .ofPattern(pattern)
-            .withLocale(Locale.getDefault())
-    )
-}
-
 
 fun LocalDateTime.format(
     pattern: String
@@ -279,7 +228,8 @@ fun LocalDateTime.convertLocalToUTC(): LocalDateTime {
     return this.minusSeconds(offset)
 }
 
-fun LocalDateTime.toInstantUTC(ivyTimeZone: IvyTimeZone?):Instant = this.toInstant(ZoneOffset.of(ivyTimeZone?.offset))
+fun LocalDateTime.toInstant(ivyTimeZone: IvyTimeZone): Instant =
+    ZonedDateTime.ofLocal(this, ivyTimeZone.zoneId, null).toInstant()
 
 // The timepicker returns time in UTC, but the date picker returns date in LocalTimeZone
 // hence use this method to get both date & time in UTC
@@ -368,4 +318,82 @@ fun LocalDate.withDayOfMonthSafe(targetDayOfMonth: Int): LocalDate {
     return this.withDayOfMonth(
         if (targetDayOfMonth > maxDayOfMonth) maxDayOfMonth else targetDayOfMonth
     )
+}
+
+/*
+* timezone aware utils
+* */
+fun timeNowLocal(zone: IvyTimeZone): ZonedDateTime = ZonedDateTime.now(zone.zoneId)
+
+fun ZonedDateTime.formatNicely(
+    noWeekDay: Boolean = false
+): String = this.toInstant().formatNicely(noWeekDay, this.zone.id.toIvyTimeZoneOrDefault())
+
+fun Instant.formatNicely(
+    noWeekDay: Boolean = false,
+    timeZone: IvyTimeZone
+): String {
+    val targetTime = this.atZone(timeZone.zoneId)
+    val todayTime = Instant.now().atZone(timeZone.zoneId)
+    val todayDate = todayTime.toLocalDate()
+
+    val isThisYear = todayTime.year == targetTime.year
+    val patternNoWeekDay = "dd MMM"
+
+    if (noWeekDay) {
+        return if (isThisYear) {
+            targetTime.formatLocal(patternNoWeekDay)
+        } else {
+            targetTime.formatLocal("dd MMM, yyyy")
+        }
+    }
+
+    return when (targetTime.toLocalDate()) {
+        todayDate -> {
+            stringRes(R.string.today_date, targetTime.formatLocal(patternNoWeekDay))
+        }
+
+        todayDate.minusDays(1) -> {
+            stringRes(R.string.yesterday_date, targetTime.formatLocal(patternNoWeekDay))
+        }
+
+        todayDate.plusDays(1) -> {
+            stringRes(R.string.tomorrow_date, targetTime.formatLocal(patternNoWeekDay))
+        }
+
+        else -> {
+            if (isThisYear) {
+                targetTime.formatLocal("EEE, dd MMM")
+            } else {
+                targetTime.formatLocal("dd MMM, yyyy")
+            }
+        }
+    }
+}
+
+fun Instant.formatLocal(
+    pattern: String = "dd MMM yyyy, HH:mm",
+    tz: IvyTimeZone
+): String = this.atZone(tz.zoneId).formatLocal(pattern)
+
+fun ZonedDateTime.formatLocal(
+    pattern: String = "dd MMM yyyy, HH:mm"
+): String {
+    return this.format(
+        DateTimeFormatter
+            .ofPattern(pattern)
+            .withLocale(Locale.getDefault())
+    )
+}
+
+fun Instant.toLocalDate(timeZone: IvyTimeZone): LocalDate = this.atZone(timeZone.zoneId).toLocalDate()
+
+fun Instant.formatTimeOnly(tz: IvyTimeZone): String = this.formatLocal(pattern = "HH:mm", tz = tz)
+
+fun Instant.formatDateOnly(tz: IvyTimeZone): String = this.formatLocal(pattern = "MMM. dd", tz = tz)
+
+fun replaceDateOrTimeInInstant(instant: Instant, dateOrTime: TemporalAdjuster, timeZone: IvyTimeZone): Instant {
+    val originalZonedDateTime = instant.atZone(timeZone.zoneId)
+    val newZonedDateTime = originalZonedDateTime.with(dateOrTime)
+    return newZonedDateTime.toInstant()
 }

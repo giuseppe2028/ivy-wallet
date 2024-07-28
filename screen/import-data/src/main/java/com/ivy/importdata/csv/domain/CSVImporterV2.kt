@@ -27,7 +27,7 @@ import com.ivy.legacy.datamodel.temp.toLegacyDomain
 import com.ivy.legacy.datamodel.toEntity
 import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.wallet.domain.data.IvyCurrency
 import com.ivy.wallet.domain.pure.util.nextOrderNum
@@ -239,7 +239,7 @@ class CSVImporterV2 @Inject constructor(
             accountId = account.id,
             toAccountId = toAccount?.id,
             toAmount = toAmount?.toBigDecimal() ?: amount.toBigDecimal(),
-            dateTime = dateTime.toInstantUTC(timeZone),
+            dateTime = dateTime.toInstant(timeZone),
             dueDate = null,
             categoryId = category?.id?.value,
             title = title,

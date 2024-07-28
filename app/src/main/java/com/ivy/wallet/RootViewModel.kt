@@ -2,10 +2,7 @@ package com.ivy.wallet
 
 import android.content.Intent
 import androidx.biometric.BiometricPrompt
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.ivy.base.legacy.SharedPrefs
 import com.ivy.base.legacy.Theme
@@ -15,8 +12,6 @@ import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.repository.LegalRepository
 import com.ivy.frp.test.TestIdlingResource
 import com.ivy.legacy.IvyWalletCtx
-import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.readOnly
 import com.ivy.navigation.DisclaimerScreen
@@ -33,7 +28,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicLong
@@ -60,9 +54,6 @@ class RootViewModel @Inject constructor(
 
     private val _appLocked = MutableStateFlow<Boolean?>(null)
     val appLocked = _appLocked.readOnly()
-
-    private val _ivyTimeZone = settingsDao.findLatestTimeZoneFlow().distinctUntilChanged().asLiveData()
-    val ivyTimeZone: LiveData<IvyTimeZone> get() = _ivyTimeZone.map { it.toIvyTimeZoneOrDefault() }
 
     fun start(systemDarkMode: Boolean, intent: Intent) {
         viewModelScope.launch {

@@ -49,13 +49,13 @@ import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.data.AppBaseData
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.capitalizeLocal
 import com.ivy.legacy.utils.format
 import com.ivy.legacy.utils.formatNicely
 import com.ivy.legacy.utils.isNotNullOrBlank
 import com.ivy.legacy.utils.timeNowUTC
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import com.ivy.navigation.Navigation
 import com.ivy.navigation.TransactionsScreen
 import com.ivy.navigation.navigation
@@ -84,7 +84,6 @@ import com.ivy.wallet.ui.theme.wallet.AmountCurrencyB1
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import java.time.Instant
-import java.time.ZonedDateTime
 import java.util.UUID
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
@@ -371,7 +370,7 @@ fun CategoryBadgeDisplay(
 
 @Composable
 private fun getTransactionDescription(transaction: Transaction, timeZone: IvyTimeZone): String? {
-    val paidFor = transaction.paidFor?.let { ZonedDateTime.ofInstant(it, timeZone.zoneId) }
+    val paidFor = transaction.paidFor?.atZone(timeZone.zoneId)
     return when {
         transaction.description.isNotNullOrBlank() -> transaction.description!!
         transaction.recurringRuleId != null && transaction.dueDate == null && paidFor != null -> {
@@ -589,7 +588,7 @@ private data class AmountTypeStyle(
 private fun PreviewUpcomingExpense() {
     IvyWalletPreview {
         LazyColumn(Modifier.fillMaxSize()) {
-            val timeZone = "UTC".toIvyTimeZone()
+            val timeZone = "UTC".toIvyTimeZoneOrDefault()
             val cash = Account(name = "Cash", Green.toArgb())
             val food = Category(
                 name = NotBlankTrimmedString.unsafe("Food"),
@@ -614,7 +613,7 @@ private fun PreviewUpcomingExpense() {
                         title = "Lidl pazar",
                         categoryId = food.id.value,
                         amount = 250.75.toBigDecimal(),
-                        dueDate = timeNowUTC().plusDays(5).toInstantUTC(timeZone),
+                        dueDate = timeNowUTC().plusDays(5).toInstant(timeZone),
                         dateTime = null,
                         type = TransactionType.EXPENSE,
                     ),
@@ -631,7 +630,7 @@ private fun PreviewUpcomingExpense() {
 private fun PreviewUpcomingExpenseBadgeSecondRow() {
     IvyWalletPreview {
         LazyColumn(Modifier.fillMaxSize()) {
-            val timeZone = "UTC".toIvyTimeZone()
+            val timeZone = "UTC".toIvyTimeZoneOrDefault()
             val cash = Account(name = "Cash", Green.toArgb())
             val food = Category(
                 name = NotBlankTrimmedString.unsafe("Food-Travel-Entertaiment-Food"),
@@ -656,7 +655,7 @@ private fun PreviewUpcomingExpenseBadgeSecondRow() {
                         title = "Lidl pazar",
                         categoryId = food.id.value,
                         amount = 250.75.toBigDecimal(),
-                        dueDate = timeNowUTC().plusDays(5).toInstantUTC(timeZone),
+                        dueDate = timeNowUTC().plusDays(5).toInstant(timeZone),
                         dateTime = null,
                         type = TransactionType.EXPENSE,
                     ),
@@ -673,7 +672,7 @@ private fun PreviewUpcomingExpenseBadgeSecondRow() {
 private fun PreviewOverdueExpense() {
     IvyWalletPreview {
         LazyColumn(Modifier.fillMaxSize()) {
-            val timeZone = "UTC".toIvyTimeZone()
+            val timeZone = "UTC".toIvyTimeZoneOrDefault()
             val cash = Account(name = "Cash", color = Green.toArgb())
             val food = Category(
                 name = NotBlankTrimmedString.unsafe("Rent"),
@@ -698,7 +697,7 @@ private fun PreviewOverdueExpense() {
                         title = "Rent",
                         categoryId = food.id.value,
                         amount = 500.0.toBigDecimal(),
-                        dueDate = timeNowUTC().minusDays(5).toInstantUTC(timeZone),
+                        dueDate = timeNowUTC().minusDays(5).toInstant(timeZone),
                         dateTime = null,
                         type = TransactionType.EXPENSE
                     ),
@@ -715,7 +714,7 @@ private fun PreviewOverdueExpense() {
 private fun PreviewNormalExpense() {
     IvyWalletPreview {
         LazyColumn(Modifier.fillMaxSize()) {
-            val timeZone = "UTC".toIvyTimeZone()
+            val timeZone = "UTC".toIvyTimeZoneOrDefault()
             val cash = Account(name = "Cash", color = Green.toArgb())
             val food = Category(
                 name = NotBlankTrimmedString.unsafe("Bitovi"),
@@ -740,7 +739,7 @@ private fun PreviewNormalExpense() {
                         title = "Близкия магазин",
                         categoryId = food.id.value,
                         amount = 32.51.toBigDecimal(),
-                        dateTime = timeNowUTC().toInstantUTC(timeZone),
+                        dateTime = timeNowUTC().toInstant(timeZone),
                         type = TransactionType.EXPENSE
                     ),
                     onPayOrGet = {},
@@ -756,7 +755,7 @@ private fun PreviewNormalExpense() {
 private fun PreviewIncome() {
     IvyWalletPreview {
         LazyColumn(Modifier.fillMaxSize()) {
-            val timeZone = "UTC".toIvyTimeZone()
+            val timeZone = "UTC".toIvyTimeZoneOrDefault()
             val cash = Account(name = "DSK Bank", color = Green.toArgb())
             val category = Category(
                 name = NotBlankTrimmedString.unsafe("Salary"),
@@ -781,7 +780,7 @@ private fun PreviewIncome() {
                         title = "Qredo Salary May",
                         categoryId = category.id.value,
                         amount = 8049.70.toBigDecimal(),
-                        dateTime = timeNowUTC().toInstantUTC(timeZone),
+                        dateTime = timeNowUTC().toInstant(timeZone),
                         type = TransactionType.INCOME
                     ),
                     onPayOrGet = {},
@@ -797,7 +796,7 @@ private fun PreviewIncome() {
 private fun PreviewTransfer() {
     IvyWalletPreview {
         LazyColumn(Modifier.fillMaxSize()) {
-            val timeZone = "UTC".toIvyTimeZone()
+            val timeZone = "UTC".toIvyTimeZoneOrDefault()
             val acc1 = Account(name = "DSK Bank", color = Green.toArgb(), icon = "bank")
             val acc2 = Account(name = "Revolut", color = IvyDark.toArgb(), icon = "revolut")
 
@@ -814,7 +813,7 @@ private fun PreviewTransfer() {
                         toAccountId = acc2.id,
                         title = "Top-up revolut",
                         amount = 1000.0.toBigDecimal(),
-                        dateTime = timeNowUTC().toInstantUTC(timeZone),
+                        dateTime = timeNowUTC().toInstant(timeZone),
                         type = TransactionType.TRANSFER
                     ),
                     onPayOrGet = {},
@@ -830,7 +829,7 @@ private fun PreviewTransfer() {
 private fun PreviewTransfer_differentCurrency() {
     IvyWalletPreview {
         LazyColumn(Modifier.fillMaxSize()) {
-            val timeZone = "UTC".toIvyTimeZone()
+            val timeZone = "UTC".toIvyTimeZoneOrDefault()
             val acc1 = Account(name = "DSK Bank", color = Green.toArgb(), icon = "bank")
             val acc2 = Account(
                 name = "Revolut",
@@ -853,7 +852,7 @@ private fun PreviewTransfer_differentCurrency() {
                         title = "Top-up revolut",
                         amount = 1000.0.toBigDecimal(),
                         toAmount = 510.toBigDecimal(),
-                        dateTime = timeNowUTC().toInstantUTC(timeZone),
+                        dateTime = timeNowUTC().toInstant(timeZone),
                         type = TransactionType.TRANSFER
                     ),
                     onPayOrGet = {},

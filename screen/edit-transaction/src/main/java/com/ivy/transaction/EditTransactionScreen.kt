@@ -41,13 +41,15 @@ import com.ivy.design.utils.hideKeyboard
 import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.data.EditTransactionDisplayLoan
 import com.ivy.legacy.datamodel.Account
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.ivyWalletCtx
 import com.ivy.legacy.rootView
 import com.ivy.legacy.ui.component.edit.TransactionDateTime
+import com.ivy.legacy.ui.component.edit.core.Description
 import com.ivy.legacy.ui.component.tags.AddTagButton
 import com.ivy.legacy.ui.component.tags.ShowTagModal
-import com.ivy.legacy.utils.convertUTCtoLocal
 import com.ivy.legacy.utils.onScreenStart
+import com.ivy.legacy.utils.toLocalDate
 import com.ivy.navigation.EditPlannedScreen
 import com.ivy.navigation.EditTransactionScreen
 import com.ivy.navigation.IvyPreview
@@ -58,7 +60,6 @@ import com.ivy.wallet.domain.data.CustomExchangeRateState
 import com.ivy.wallet.domain.deprecated.logic.model.CreateAccountData
 import com.ivy.wallet.domain.deprecated.logic.model.CreateCategoryData
 import com.ivy.wallet.ui.edit.core.Category
-import com.ivy.legacy.ui.component.edit.core.Description
 import com.ivy.wallet.ui.edit.core.DueDate
 import com.ivy.wallet.ui.edit.core.EditBottomSheet
 import com.ivy.wallet.ui.edit.core.Title
@@ -82,6 +83,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -104,6 +106,7 @@ fun BoxWithConstraintsScope.EditTransactionScreen(screen: EditTransactionScreen)
         screen = screen,
         transactionType = uiState.transactionType,
         baseCurrency = uiState.currency,
+        timeZone = uiState.timeZone,
         initialTitle = uiState.initialTitle,
         titleSuggestions = uiState.titleSuggestions,
         description = uiState.description,
@@ -190,14 +193,15 @@ private fun BoxWithConstraintsScope.UI(
     screen: EditTransactionScreen,
     transactionType: TransactionType,
     baseCurrency: String,
+    timeZone: IvyTimeZone,
     initialTitle: String?,
     titleSuggestions: ImmutableSet<String>,
     description: String?,
     category: Category?,
-    dateTime: LocalDateTime?,
+    dateTime: Instant?,
     account: Account?,
     toAccount: Account?,
-    dueDate: LocalDateTime?,
+    dueDate: Instant?,
     amount: Double,
 
     customExchangeRateState: CustomExchangeRateState,
@@ -350,13 +354,18 @@ private fun BoxWithConstraintsScope.UI(
         val ivyContext = ivyWalletCtx()
 
         if (dueDate != null) {
-            DueDate(dueDate = dueDate) {
-                ivyContext.datePicker(
-                    initialDate = dueDate.toLocalDate()
-                ) {
-                    onDueDateChange(it.atTime(12, 0))
+            DueDate(
+                dueDate = dueDate,
+                timeZone = timeZone,
+                onPickDueDate = {
+                    ivyContext.datePicker(
+                        initialDate = dueDate.toLocalDate(timeZone = timeZone),
+                        onDatePicked = {
+                            onDueDateChange(it.atTime(12, 0))
+                        }
+                    )
                 }
-            }
+            )
 
             Spacer(Modifier.height(12.dp))
         }
@@ -367,17 +376,23 @@ private fun BoxWithConstraintsScope.UI(
             onEditDescription = { descriptionModalVisible = true }
         )
 
-        TransactionDateTime(dateTime = dateTime, dueDateTime = dueDate, onEditDate = {
-            ivyContext.datePicker(
-                initialDate = dateTime?.convertUTCtoLocal()?.toLocalDate()
-            ) { date ->
-                onSetDate((date))
+        TransactionDateTime(
+            dateTime = dateTime,
+            dueDateTime = dueDate,
+            timeZone = timeZone,
+            onEditDate = {
+                ivyContext.datePicker(
+                    initialDate = dateTime?.toLocalDate(timeZone = timeZone),
+                    onDatePicked = onSetDate
+                )
+            },
+            onEditTime = {
+                ivyContext.timePicker(
+                    tz = timeZone,
+                    onTimePicked = onSetTime,
+                )
             }
-        }, onEditTime = {
-            ivyContext.timePicker { time ->
-                onSetTime(time)
-            }
-        })
+        )
 
         if (transactionType == TransactionType.TRANSFER && customExchangeRateState.showCard) {
             Spacer(Modifier.height(12.dp))
@@ -646,9 +661,6 @@ private fun shouldFocusTitle(
 
 private fun shouldFocusAmount(amount: Double) = amount == 0.0
 
-/** For Preview purpose **/
-private val testDateTime = LocalDateTime.of(2023, 4, 27, 0, 35)
-
 @ExperimentalFoundationApi
 @Preview
 @Composable
@@ -661,7 +673,8 @@ private fun BoxWithConstraintsScope.Preview(isDark: Boolean = false) {
             tags = persistentListOf(),
             transactionAssociatedTags = persistentListOf(),
             baseCurrency = "BGN",
-            dateTime = testDateTime,
+            timeZone = IvyTimeZone.getDeviceDefault(),
+            dateTime = Instant.now(),
             description = null,
             category = null,
             account = Account(name = "phyre", Orange.toArgb()),

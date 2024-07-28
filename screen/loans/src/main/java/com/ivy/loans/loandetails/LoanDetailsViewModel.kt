@@ -19,6 +19,7 @@ import com.ivy.legacy.datamodel.LoanRecord
 import com.ivy.legacy.datamodel.temp.toLegacy
 import com.ivy.legacy.datamodel.temp.toLegacyDomain
 import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.domain.deprecated.logic.AccountCreator
 import com.ivy.legacy.utils.computationThread
 import com.ivy.legacy.utils.ioThread
@@ -80,7 +81,7 @@ class LoanDetailsViewModel @Inject constructor(
     private val loanRecordModalData = mutableStateOf<LoanRecordModalData?>(null)
     private val waitModalVisible = mutableStateOf(false)
     private val isDeleteModalVisible = mutableStateOf(false)
-    private val timeZone = mutableStateOf<IvyTimeZone?>(null)
+    private val timeZone = mutableStateOf(IvyTimeZone.getDeviceDefault())
 
     lateinit var screen: LoanDetailsScreen
 
@@ -113,7 +114,7 @@ class LoanDetailsViewModel @Inject constructor(
             is LoanRecordModalEvent -> handleLoanRecordModalEvents(event)
             is LoanModalEvent -> handleLoanModalEvents(event)
             is DeleteLoanModalEvent -> handleDeleteLoanModalEvents(event)
-            is LoanDetailsScreenEvent -> handleLoanDetailsScreenEvents(event)
+            else -> handleLoanDetailsScreenEvents(event)
         }
     }
 
@@ -238,6 +239,8 @@ class LoanDetailsViewModel @Inject constructor(
                 baseCurrency.value = it
             }
 
+            timeZone.value = ioThread { settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault() }
+
             accounts.value = accountsAct(Unit)
 
             loan.value = loanByIdAct(loanId)
@@ -268,6 +271,7 @@ class LoanDetailsViewModel @Inject constructor(
 
                         DisplayLoanRecord(
                             it.toLegacyDomain(),
+                            timeZone = timeZone.value,
                             account = account,
                             loanRecordTransaction = trans != null,
                             loanRecordCurrencyCode = account?.currency ?: defaultCurrencyCode,

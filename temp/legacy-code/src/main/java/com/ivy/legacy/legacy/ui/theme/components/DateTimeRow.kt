@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.ivyWalletCtx
 import com.ivy.legacy.utils.convertUTCtoLocal
 import com.ivy.legacy.utils.formatLocalTime
@@ -48,9 +49,12 @@ fun DateTimeRow(
             text = dateTime.formatLocalTime(),
             iconStart = R.drawable.ic_date
         ) {
-            ivyContext.timePicker {
-                onSetDateTime(getTrueDate(dateTime.convertUTCtoLocal().toLocalDate(), it))
-            }
+            ivyContext.timePicker(
+                tz = IvyTimeZone.getDeviceDefault(), // FIXME urgently
+                onTimePicked = {
+                    onSetDateTime(getTrueDate(dateTime.convertUTCtoLocal().toLocalDate(), it))
+                }
+            )
         }
 
         Spacer(Modifier.width(24.dp))

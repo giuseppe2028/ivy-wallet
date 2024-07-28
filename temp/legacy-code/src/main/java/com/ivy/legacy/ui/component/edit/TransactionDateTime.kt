@@ -23,21 +23,22 @@ import com.ivy.legacy.IvyWalletComponentPreview
 import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.utils.formatNicely
 import com.ivy.legacy.utils.formatTimeOnly
-import com.ivy.legacy.utils.timeNowLocal
-import com.ivy.legacy.utils.timeNowUTC
 import com.ivy.ui.R
 import com.ivy.wallet.ui.theme.components.IvyIcon
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Deprecated("Old design system. Use `:ivy-design` and Material3")
 @Composable
 fun TransactionDateTime(
-    dateTime: LocalDateTime?,
-    dueDateTime: LocalDateTime?,
+    dateTime: Instant?,
+    dueDateTime: Instant?,
+    timeZone: IvyTimeZone,
     onEditDate: () -> Unit,
     onEditTime: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dateTime = dateTime ?: Instant.now()
+
     if (dueDateTime == null || dateTime != null) {
         Spacer(modifier.height(12.dp))
 
@@ -68,9 +69,7 @@ fun TransactionDateTime(
             Spacer(Modifier.weight(1f))
 
             Text(
-                text = (dateTime ?: timeNowUTC()).formatNicely(
-                    noWeekDay = true
-                ),
+                text = dateTime.formatNicely(noWeekDay = true, timeZone = timeZone),
                 style = UI.typo.nB2.style(
                     color = UI.colors.pureInverse,
                     fontWeight = FontWeight.ExtraBold
@@ -80,7 +79,7 @@ fun TransactionDateTime(
                 }
             )
             Text(
-                text = " " + (dateTime?.formatTimeOnly() ?: timeNowLocal(IvyTimeZone.getDeviceDefault()).toLocalDateTime().formatTimeOnly()),
+                text = " ${dateTime.formatTimeOnly(tz = timeZone)}",
                 style = UI.typo.nB2.style(
                     color = UI.colors.pureInverse,
                     fontWeight = FontWeight.ExtraBold
@@ -99,12 +98,11 @@ fun TransactionDateTime(
 private fun Preview() {
     IvyWalletComponentPreview {
         TransactionDateTime(
-            dateTime = timeNowUTC(),
+            dateTime = Instant.now(),
             dueDateTime = null,
-            onEditDate = {
-            },
-            onEditTime = {
-            }
+            timeZone = IvyTimeZone.getDeviceDefault(),
+            onEditDate = {},
+            onEditTime = {}
         )
     }
 }

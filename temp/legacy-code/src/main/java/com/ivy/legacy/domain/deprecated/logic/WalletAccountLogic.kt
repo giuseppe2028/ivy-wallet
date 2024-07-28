@@ -16,9 +16,9 @@ import com.ivy.legacy.data.model.filterOverdue
 import com.ivy.legacy.data.model.filterUpcoming
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.temp.toDomain
-import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.timeNowUTC
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import com.ivy.wallet.domain.action.viewmodel.account.AccountDataAct
 import com.ivy.wallet.domain.pure.data.ClosedTimeRange
 import kotlinx.collections.immutable.toImmutableList
@@ -58,7 +58,7 @@ class WalletAccountLogic @Inject constructor(
                     title = adjustTransactionTitle,
                     amount = diff.absoluteValue.toBigDecimal(),
                     toAmount = diff.absoluteValue.toBigDecimal(),
-                    dateTime = timeNowUTC().toInstantUTC(settingsDao.findFirst().timeZoneId?.toIvyTimeZone()),
+                    dateTime = timeNowUTC().toInstant(settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault()),
                     accountId = account.id,
                     isSynced = trnIsSyncedFlag
                 ).toDomain(transactionMapper)?.let {
@@ -73,7 +73,7 @@ class WalletAccountLogic @Inject constructor(
                     title = adjustTransactionTitle,
                     amount = diff.absoluteValue.toBigDecimal(),
                     toAmount = diff.absoluteValue.toBigDecimal(),
-                    dateTime = timeNowUTC().toInstantUTC(settingsDao.findFirst().timeZoneId?.toIvyTimeZone()),
+                    dateTime = timeNowUTC().toInstant(settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault()),
                     accountId = account.id,
                     isSynced = trnIsSyncedFlag
                 ).toDomain(transactionMapper)?.let {

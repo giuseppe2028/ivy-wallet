@@ -40,7 +40,6 @@ import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.LoanRecord
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZone
 import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.legacy.ui.theme.components.DateTimeRow
 import com.ivy.legacy.legacy.ui.theme.modal.ModalNameInput
@@ -48,7 +47,7 @@ import com.ivy.legacy.utils.getDefaultFIATCurrency
 import com.ivy.legacy.utils.onScreenStart
 import com.ivy.legacy.utils.selectEndTextFieldValue
 import com.ivy.legacy.utils.timeNowUTC
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import com.ivy.legacy.utils.toLocalDateTimeWithZone
 import com.ivy.ui.R
 import com.ivy.wallet.domain.deprecated.logic.model.CreateAccountData
@@ -70,7 +69,7 @@ import java.util.UUID
 data class LoanRecordModalData(
     val loanRecord: LoanRecord?,
     val baseCurrency: String,
-    val timeZone:IvyTimeZone?,
+    val timeZone: IvyTimeZone,
     val loanAccountCurrencyCode: String? = null,
     val selectedAccount: Account? = null,
     val createLoanRecordTransaction: Boolean = false,
@@ -82,9 +81,9 @@ data class LoanRecordModalData(
 @Composable
 fun BoxWithConstraintsScope.LoanRecordModal(
     modal: LoanRecordModalData?,
+    modifier: Modifier = Modifier,
     accounts: List<Account> = emptyList(),
     onCreateAccount: (CreateAccountData) -> Unit = {},
-
     onCreate: (CreateLoanRecordData) -> Unit,
     onEdit: (EditLoanRecordData) -> Unit,
     onDelete: (LoanRecord) -> Unit,
@@ -101,7 +100,7 @@ fun BoxWithConstraintsScope.LoanRecordModal(
         mutableStateOf(modal?.loanRecord?.amount ?: 0.0)
     }
     var dateTime by remember(modal) {
-        mutableStateOf(modal?.loanRecord?.dateTime ?: timeNowUTC().toInstantUTC("UTC".toIvyTimeZoneOrDefault()))
+        mutableStateOf(modal?.loanRecord?.dateTime ?: timeNowUTC().toInstant("UTC".toIvyTimeZoneOrDefault()))
     }
     var selectedAcc by remember(modal) {
         mutableStateOf(modal?.selectedAccount)
@@ -121,8 +120,8 @@ fun BoxWithConstraintsScope.LoanRecordModal(
     var loanRecordType by remember(modal) {
         mutableStateOf(modal?.loanRecord?.loanRecordType ?: LoanRecordType.DECREASE)
     }
-    var timeZone by remember(modal) {
-        mutableStateOf(modal?.timeZone ?: "UTC".toIvyTimeZone())
+    val timeZone by remember(modal) {
+        mutableStateOf(modal?.timeZone ?: IvyTimeZone.getDeviceDefault())
     }
 
     var amountModalVisible by remember { mutableStateOf(false) }
@@ -213,7 +212,7 @@ fun BoxWithConstraintsScope.LoanRecordModal(
         DateTimeRow(
             dateTime = dateTime.toLocalDateTimeWithZone(timeZone),
             onSetDateTime = {
-                dateTime = it.toInstantUTC(timeZone)
+                dateTime = it.toInstant(timeZone)
             }
         )
 
@@ -671,7 +670,7 @@ private fun Preview() {
             modal = LoanRecordModalData(
                 loanRecord = null,
                 baseCurrency = "BGN",
-                timeZone = "UTC".toIvyTimeZone()
+                timeZone = IvyTimeZone.getDeviceDefault()
             ),
             onCreate = {},
             onEdit = {},

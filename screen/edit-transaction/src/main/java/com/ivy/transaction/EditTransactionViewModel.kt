@@ -34,14 +34,10 @@ import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.domain.deprecated.logic.AccountCreator
 import com.ivy.legacy.utils.computationThread
-import com.ivy.legacy.utils.convertUTCToLocal
-import com.ivy.legacy.utils.dateNowLocal
-import com.ivy.legacy.utils.getTrueDate
 import com.ivy.legacy.utils.ioThread
+import com.ivy.legacy.utils.replaceDateOrTimeInInstant
 import com.ivy.legacy.utils.timeNowLocal
-import com.ivy.legacy.utils.timeUTC
-import com.ivy.legacy.utils.toInstantUTC
-import com.ivy.legacy.utils.toLocalDateTimeWithZone
+import com.ivy.legacy.utils.toInstant
 import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.legacy.utils.uiThread
 import com.ivy.navigation.EditTransactionScreen
@@ -82,7 +78,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneId
 import java.util.UUID
 import javax.inject.Inject
 
@@ -136,7 +131,7 @@ class EditTransactionViewModel @Inject constructor(
     private val hasChanges = mutableStateOf(false)
     private val displayLoanHelper = mutableStateOf(EditTransactionDisplayLoan())
 
-    private var timezone = mutableStateOf<IvyTimeZone?>(null)
+    private var timezone = mutableStateOf(IvyTimeZone.getDeviceDefault())
     // This is used to when the transaction is associated with a loan/loan record,
     // used to indicate the background updating of loan/loanRecord data
     private val backgroundProcessingStarted = mutableStateOf(false)
@@ -160,7 +155,7 @@ class EditTransactionViewModel @Inject constructor(
 
             baseUserCurrency = baseCurrency()
 
-            timezone.value = getTimeZone()
+            timezone.value = fetchTimeZone()
 
             val tagList = async { getAllTags() }
 
@@ -204,6 +199,7 @@ class EditTransactionViewModel @Inject constructor(
             initialTitle = getInitialTitle(),
             titleSuggestions = getTitleSuggestions(),
             currency = getCurrency(),
+            timeZone = getTimeZone(),
             description = getDescription(),
             dateTime = getDateTime(),
             dueDate = getDueDate(),
@@ -243,18 +239,23 @@ class EditTransactionViewModel @Inject constructor(
     }
 
     @Composable
+    private fun getTimeZone(): IvyTimeZone {
+        return timezone.value
+    }
+
+    @Composable
     private fun getDescription(): String? {
         return description.value
     }
 
     @Composable
-    private fun getDateTime(): LocalDateTime? {
-        return dateTime.value?.toLocalDateTimeWithZone(timezone.value)
+    private fun getDateTime(): Instant? {
+        return dateTime.value
     }
 
     @Composable
-    private fun getDueDate(): LocalDateTime? {
-        return dueDate.value?.toLocalDateTimeWithZone(timezone.value)
+    private fun getDueDate(): Instant? {
+        return dueDate.value
     }
 
     @Composable
@@ -533,48 +534,42 @@ class EditTransactionViewModel @Inject constructor(
 
     private fun onDueDateChanged(newDueDate: LocalDateTime?) {
         loadedTransaction = loadedTransaction().copy(
-            dueDate = newDueDate?.toInstantUTC(timezone.value)
+            dueDate = newDueDate?.toInstant(timezone.value)
         )
-        dueDate.value = newDueDate?.toInstantUTC(timezone.value)
+        dueDate.value = newDueDate?.toInstant(timezone.value)
 
         saveIfEditMode()
     }
 
-    private fun onSetDateTime(newDateTime: LocalDateTime) {
+    private fun onSetDateTime(newDateTime: Instant) {
         loadedTransaction = loadedTransaction().copy(
-            dateTime = newDateTime.toInstantUTC(timezone.value)
+            dateTime = newDateTime
         )
-        dateTime.value = newDateTime.toInstantUTC(timezone.value)
+        dateTime.value = newDateTime
 
         saveIfEditMode()
     }
 
-    fun onSetDate(newDate: LocalDate) {
-        loadedTransaction = loadedTransaction().copy(
-            date = newDate
-        )
+    private fun onSetDate(newDate: LocalDate) {
+        loadedTransaction = loadedTransaction().copy(date = newDate)
         date.value = newDate
         onSetDateTime(
-            getTrueDate(
-                loadedTransaction?.date ?: dateNowLocal(),
-                //TODO insert the one preferred
-                (dateTime.value?.atZone(ZoneId.of("ACT"))?.toLocalTime() ?: timeUTC()),
-                true
+            replaceDateOrTimeInInstant(
+                instant = dateTime.value ?: Instant.now(),
+                dateOrTime = newDate,
+                timeZone = timezone.value
             )
         )
     }
 
-    fun onSetTime(newTime: LocalTime) {
-        loadedTransaction = loadedTransaction().copy(
-            time = newTime.convertUTCToLocal()
-        )
+    private fun onSetTime(newTime: LocalTime) {
+        loadedTransaction = loadedTransaction().copy(time = newTime)
         time.value = newTime
         onSetDateTime(
-            //TODO take a look
-            getTrueDate(
-                dateTime.value?.atZone(ZoneId.of("ACT"))?.toLocalDate() ?: dateNowLocal(),
-                loadedTransaction?.time ?: timeUTC(),
-                true
+            replaceDateOrTimeInInstant(
+                instant = dateTime.value ?: Instant.now(),
+                dateOrTime = newTime,
+                timeZone = timezone.value
             )
         )
     }
@@ -695,7 +690,7 @@ class EditTransactionViewModel @Inject constructor(
                     dateTime = when {
                         loadedTransaction().dateTime == null &&
                                 dueDate.value == null -> {
-                            timeNowLocal(getTimeZone()).toInstant()
+                            timeNowLocal(fetchTimeZone()).toInstant()
                         }
 
                         else -> loadedTransaction().dateTime
@@ -755,7 +750,7 @@ class EditTransactionViewModel @Inject constructor(
     }
 
     private suspend fun baseCurrency(): String = ioThread { settingsDao.findFirst().currency }
-    private suspend fun getTimeZone(): IvyTimeZone = ioThread { settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault() }
+    private suspend fun fetchTimeZone(): IvyTimeZone = ioThread { settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault() }
 
     private fun closeScreen() {
         if (nav.backStackEmpty()) {

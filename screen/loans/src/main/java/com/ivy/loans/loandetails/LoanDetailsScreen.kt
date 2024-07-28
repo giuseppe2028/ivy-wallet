@@ -57,7 +57,7 @@ import com.ivy.legacy.utils.formatNicelyWithTime
 import com.ivy.legacy.utils.isNotNullOrBlank
 import com.ivy.legacy.utils.rememberInteractionSource
 import com.ivy.legacy.utils.setStatusBarDarkTextCompat
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import com.ivy.legacy.utils.toLocalDateTimeWithZone
 import com.ivy.loans.loan.data.DisplayLoanRecord
 import com.ivy.loans.loandetails.events.DeleteLoanModalEvent
@@ -908,28 +908,31 @@ private fun Preview_Records(theme: Theme = Theme.LIGHT) {
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 123.45,
-                            dateTime = testDateTime.minusDays(1).toInstantUTC("ACT".toIvyTimeZoneOrDefault()),
+                            dateTime = testDateTime.minusDays(1).toInstant("ACT".toIvyTimeZoneOrDefault()),
                             note = "Cash",
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.INCREASE
-                        )
+                        ),
+                        IvyTimeZone.getDeviceDefault()
                     ),
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 0.50,
-                            dateTime = testDateTime.minusYears(1).toInstantUTC("ACT".toIvyTimeZoneOrDefault()),
+                            dateTime = testDateTime.minusYears(1).toInstant("ACT".toIvyTimeZoneOrDefault()),
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.DECREASE
-                        )
+                        ),
+                        IvyTimeZone.getDeviceDefault()
                     ),
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 1000.00,
-                            dateTime = testDateTime.minusMonths(1).toInstantUTC("ACT".toIvyTimeZoneOrDefault()),
+                            dateTime = testDateTime.minusMonths(1).toInstant("ACT".toIvyTimeZoneOrDefault()),
                             note = "Revolut",
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.INCREASE
-                        )
+                        ),
+                        IvyTimeZone.getDeviceDefault()
                     ),
                 ),
                 loanTotalAmount = 4023.54,

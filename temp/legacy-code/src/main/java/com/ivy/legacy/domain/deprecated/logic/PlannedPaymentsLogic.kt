@@ -20,7 +20,7 @@ import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import com.ivy.wallet.domain.deprecated.logic.currency.ExchangeRatesLogic
 import com.ivy.wallet.domain.deprecated.logic.currency.sumByDoublePlannedInBaseCurrency
 import javax.inject.Inject
@@ -171,7 +171,7 @@ class PlannedPaymentsLogic @Inject constructor(
         val paidTransaction = transaction.copy(
             paidFor = transaction.dueDate,
             dueDate = null,
-            dateTime = timeNowUTC().toInstantUTC(getTimeZone()),
+            dateTime = timeNowUTC().toInstant(getTimeZone()),
             isSynced = false,
         )
 
@@ -291,7 +291,7 @@ class PlannedPaymentsLogic @Inject constructor(
         paidTransactions.map {
             it.copy(
                 dueDate = null,
-                dateTime = timeNowUTC().toInstantUTC(getTimeZone()),
+                dateTime = timeNowUTC().toInstant(getTimeZone()),
                 isSynced = false
             )
         }

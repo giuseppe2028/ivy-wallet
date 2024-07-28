@@ -28,7 +28,7 @@ import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.utils.convertLocalToUTC
 import com.ivy.legacy.utils.ioThread
 import com.ivy.legacy.utils.timeNowUTC
-import com.ivy.legacy.utils.toInstantUTC
+import com.ivy.legacy.utils.toInstant
 import com.ivy.legacy.utils.toLowerCaseLocal
 import com.ivy.wallet.domain.data.IvyCurrency
 import com.ivy.wallet.domain.deprecated.logic.csv.model.RowMapping
@@ -250,8 +250,8 @@ class CSVImporter @Inject constructor(
                 accountId = account.id,
                 toAccountId = toAccount?.id,
                 toAmount = toAmount?.toBigDecimal() ?: amount.toBigDecimal(),
-                dateTime = dateTime?.toInstantUTC(getTimeZone()),
-                dueDate = dueDate?.toInstantUTC(getTimeZone()),
+                dateTime = dateTime?.toInstant(getTimeZone()),
+                dueDate = dueDate?.toInstant(getTimeZone()),
                 categoryId = category?.id?.value,
                 title = title,
                 description = description
