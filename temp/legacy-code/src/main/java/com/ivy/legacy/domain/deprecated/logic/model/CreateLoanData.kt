@@ -3,7 +3,7 @@ package com.ivy.wallet.domain.deprecated.logic.model
 import androidx.compose.ui.graphics.Color
 import com.ivy.data.model.LoanType
 import com.ivy.legacy.datamodel.Account
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class CreateLoanData(
     val name: String,
@@ -13,5 +13,5 @@ data class CreateLoanData(
     val icon: String?,
     val account: Account? = null,
     val createLoanTransaction: Boolean = false,
-    val dateTime: LocalDateTime
+    val dateTime: Instant
 )

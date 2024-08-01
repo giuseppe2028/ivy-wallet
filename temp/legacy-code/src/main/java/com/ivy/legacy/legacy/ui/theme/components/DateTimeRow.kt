@@ -7,21 +7,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ivy.legacy.IvyWalletComponentPreview
 import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.ivyWalletCtx
-import com.ivy.legacy.utils.convertUTCtoLocal
-import com.ivy.legacy.utils.formatLocalTime
 import com.ivy.legacy.utils.formatNicely
-import com.ivy.legacy.utils.getTrueDate
+import com.ivy.legacy.utils.formatTimeOnly
+import com.ivy.legacy.utils.replaceDateOrTimeInInstant
+import com.ivy.legacy.utils.toLocalDate
 import com.ivy.ui.R
 import com.ivy.wallet.ui.theme.components.IvyOutlinedButton
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Composable
 fun DateTimeRow(
-    dateTime: LocalDateTime,
-    onSetDateTime: (LocalDateTime) -> Unit,
+    dateTime: Instant,
+    timeZone: IvyTimeZone,
+    onSetDateTime: (Instant) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val ivyContext = ivyWalletCtx()
@@ -33,30 +36,55 @@ fun DateTimeRow(
         Spacer(Modifier.width(24.dp))
 
         IvyOutlinedButton(
-            text = dateTime.formatNicely(),
+            text = dateTime.formatNicely(timeZone = timeZone),
             iconStart = R.drawable.ic_date
         ) {
             ivyContext.datePicker(
-                initialDate = dateTime.convertUTCtoLocal().toLocalDate()
-            ) {
-                onSetDateTime(getTrueDate(it, dateTime.toLocalTime()))
-            }
+                initialDate = dateTime.toLocalDate(timeZone = timeZone),
+                onDatePicked = {
+                    onSetDateTime(
+                        replaceDateOrTimeInInstant(
+                            instant = dateTime,
+                            dateOrTime = it,
+                            timeZone = timeZone
+                        )
+                    )
+                }
+            )
         }
 
         Spacer(Modifier.weight(1f))
 
         IvyOutlinedButton(
-            text = dateTime.formatLocalTime(),
+            text = dateTime.formatTimeOnly(timeZone),
             iconStart = R.drawable.ic_date
         ) {
             ivyContext.timePicker(
-                tz = IvyTimeZone.getDeviceDefault(), // FIXME urgently
+                tz = timeZone,
                 onTimePicked = {
-                    onSetDateTime(getTrueDate(dateTime.convertUTCtoLocal().toLocalDate(), it))
+                    onSetDateTime(
+                        replaceDateOrTimeInInstant(
+                            instant = dateTime,
+                            dateOrTime = it,
+                            timeZone = timeZone
+                        )
+                    )
                 }
             )
         }
 
         Spacer(Modifier.width(24.dp))
+    }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    IvyWalletComponentPreview {
+        DateTimeRow(
+            dateTime = Instant.now(),
+            timeZone = IvyTimeZone.getDeviceDefault(),
+            onSetDateTime = {}
+        )
     }
 }

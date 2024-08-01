@@ -53,12 +53,9 @@ import com.ivy.legacy.utils.clickableNoIndication
 import com.ivy.legacy.utils.drawColoredShadow
 import com.ivy.legacy.utils.format
 import com.ivy.legacy.utils.formatNicely
-import com.ivy.legacy.utils.formatNicelyWithTime
 import com.ivy.legacy.utils.isNotNullOrBlank
 import com.ivy.legacy.utils.rememberInteractionSource
 import com.ivy.legacy.utils.setStatusBarDarkTextCompat
-import com.ivy.legacy.utils.toInstant
-import com.ivy.legacy.utils.toLocalDateTimeWithZone
 import com.ivy.loans.loan.data.DisplayLoanRecord
 import com.ivy.loans.loandetails.events.DeleteLoanModalEvent
 import com.ivy.loans.loandetails.events.LoanDetailsScreenEvent
@@ -88,7 +85,7 @@ import com.ivy.wallet.ui.theme.modal.LoanRecordModal
 import com.ivy.wallet.ui.theme.modal.ProgressModal
 import com.ivy.wallet.ui.theme.toComposeColor
 import kotlinx.collections.immutable.persistentListOf
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 
 @Composable
@@ -131,6 +128,7 @@ private fun BoxWithConstraintsScope.UI(
                     Header(
                         loan = state.loan,
                         baseCurrency = state.baseCurrency,
+                        timeZone = state.timeZone,
                         loanTotalAmount = state.loanTotalAmount,
                         amountPaid = state.amountPaid,
                         loanAmountPaid = state.loanAmountPaid,
@@ -184,6 +182,7 @@ private fun BoxWithConstraintsScope.UI(
                         loan = state.loan,
                         amount = state.loan.amount,
                         baseCurrency = state.baseCurrency,
+                        timeZone = state.timeZone
                     )
                 }
             }
@@ -202,17 +201,26 @@ private fun BoxWithConstraintsScope.UI(
         }
     }
 
-    LoanModal(modal = state.loanModalData, onCreateLoan = {
-        // do nothing
-    }, onEditLoan = { loan, createLoanTransaction ->
-        onEventHandler.invoke(LoanModalEvent.OnEditLoanModal(loan, createLoanTransaction))
-    }, dismiss = {
-        onEventHandler.invoke(LoanModalEvent.OnDismissLoanModal)
-    }, onCreateAccount = { createAccountData ->
-        onEventHandler.invoke(LoanDetailsScreenEvent.OnCreateAccount(createAccountData))
-    }, accounts = state.accounts, onPerformCalculations = {
-        onEventHandler.invoke(LoanModalEvent.PerformCalculation)
-    })
+    LoanModal(
+        timeZone = state.timeZone,
+        modal = state.loanModalData,
+        onCreateLoan = {
+            // do nothing
+        },
+        onEditLoan = { loan, createLoanTransaction ->
+            onEventHandler.invoke(LoanModalEvent.OnEditLoanModal(loan, createLoanTransaction))
+        },
+        dismiss = {
+            onEventHandler.invoke(LoanModalEvent.OnDismissLoanModal)
+        },
+        onCreateAccount = { createAccountData ->
+            onEventHandler.invoke(LoanDetailsScreenEvent.OnCreateAccount(createAccountData))
+        },
+        accounts = state.accounts,
+        onPerformCalculations = {
+            onEventHandler.invoke(LoanModalEvent.PerformCalculation)
+        }
+    )
 
     LoanRecordModal(modal = state.loanRecordModalData, onCreate = {
         onEventHandler.invoke(LoanRecordModalEvent.OnCreateLoanRecord(it))
@@ -248,6 +256,7 @@ private fun BoxWithConstraintsScope.UI(
 private fun Header(
     loan: Loan,
     baseCurrency: String,
+    timeZone: IvyTimeZone,
     loanTotalAmount: Double,
     amountPaid: Double,
     itemColor: Color,
@@ -278,6 +287,7 @@ private fun Header(
 
         LoanItem(
             loan = loan,
+            timeZone = timeZone,
             contrastColor = contrastColor,
         ) {
             onEditLoan()
@@ -314,6 +324,7 @@ private fun Header(
 @Composable
 private fun LoanItem(
     loan: Loan,
+    timeZone: IvyTimeZone,
     contrastColor: Color,
 
     onClick: () -> Unit,
@@ -359,9 +370,7 @@ private fun LoanItem(
 
             loan.dateTime?.let {
                 Text(
-                    text = it.formatNicely(
-                        noWeekDay = false
-                    ).uppercase(),
+                    text = it.formatNicely(timeZone = timeZone).uppercase(),
                     style = UI.typo.nC.style(
                         color = contrastColor
                     )
@@ -623,7 +632,7 @@ fun LazyListScope.loanRecords(
 
 @Composable
 private fun LoanRecordItem(
-    timeZone: IvyTimeZone?,
+    timeZone: IvyTimeZone,
     loan: Loan,
     loanRecord: LoanRecord,
     baseCurrency: String,
@@ -703,9 +712,7 @@ private fun LoanRecordItem(
 
         Text(
             modifier = Modifier.padding(horizontal = 24.dp),
-            text = loanRecord.dateTime.toLocalDateTimeWithZone(timeZone).formatNicelyWithTime(
-                noWeekDay = false
-            ).uppercase(),
+            text = loanRecord.dateTime.formatNicely(timeZone = timeZone, includeTime = true).uppercase(),
             style = UI.typo.nC.style(
                 color = Gray,
                 fontWeight = FontWeight.Bold
@@ -768,6 +775,7 @@ private fun InitialRecordItem(
     loan: Loan,
     amount: Double,
     baseCurrency: String,
+    timeZone: IvyTimeZone
 ) {
     Column(
         modifier = Modifier
@@ -793,9 +801,7 @@ private fun InitialRecordItem(
             padding = 8.dp,
         ) {}
 
-        loan.dateTime?.formatNicelyWithTime(
-            noWeekDay = false
-        )?.let { nicelyFormattedDate ->
+        loan.dateTime?.formatNicely(timeZone = timeZone)?.let { nicelyFormattedDate ->
             Text(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 text = nicelyFormattedDate.uppercase(),
@@ -868,7 +874,7 @@ private fun Preview_Empty() {
                     amount = 4023.54,
                     color = Red.toArgb(),
                     type = LoanType.LEND,
-                    dateTime = LocalDateTime.now()
+                    dateTime = Instant.now()
                 ),
                 displayLoanRecords = persistentListOf(),
                 amountPaid = 3821.00,
@@ -887,7 +893,8 @@ private fun Preview_Empty() {
 }
 
 /** For Preview purpose **/
-private val testDateTime = LocalDateTime.of(2023, 4, 27, 0, 35)
+private val testInstant = Instant.now()
+private val testZonedDateTime = Instant.now().atZone(IvyTimeZone.getDeviceDefault().zoneId)
 
 @Preview
 @Composable
@@ -902,13 +909,13 @@ private fun Preview_Records(theme: Theme = Theme.LIGHT) {
                     amount = 4023.54,
                     color = Red.toArgb(),
                     type = LoanType.LEND,
-                    dateTime = testDateTime,
+                    dateTime = testInstant,
                 ),
                 displayLoanRecords = persistentListOf(
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 123.45,
-                            dateTime = testDateTime.minusDays(1).toInstant("ACT".toIvyTimeZoneOrDefault()),
+                            dateTime = testZonedDateTime.minusDays(1).toInstant(),
                             note = "Cash",
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.INCREASE
@@ -918,7 +925,7 @@ private fun Preview_Records(theme: Theme = Theme.LIGHT) {
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 0.50,
-                            dateTime = testDateTime.minusYears(1).toInstant("ACT".toIvyTimeZoneOrDefault()),
+                            dateTime = testZonedDateTime.minusYears(1).toInstant(),
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.DECREASE
                         ),
@@ -927,7 +934,7 @@ private fun Preview_Records(theme: Theme = Theme.LIGHT) {
                     DisplayLoanRecord(
                         LoanRecord(
                             amount = 1000.00,
-                            dateTime = testDateTime.minusMonths(1).toInstant("ACT".toIvyTimeZoneOrDefault()),
+                            dateTime = testZonedDateTime.minusMonths(1).toInstant(),
                             note = "Revolut",
                             loanId = UUID.randomUUID(),
                             loanRecordType = LoanRecordType.INCREASE

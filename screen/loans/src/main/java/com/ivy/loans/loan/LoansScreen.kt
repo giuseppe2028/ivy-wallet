@@ -38,6 +38,7 @@ import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.datamodel.Loan
+import com.ivy.legacy.domain.data.IvyTimeZone
 import com.ivy.legacy.humanReadableType
 import com.ivy.legacy.ivyWalletCtx
 import com.ivy.legacy.utils.getDefaultFIATCurrency
@@ -62,7 +63,7 @@ import com.ivy.wallet.ui.theme.modal.LoanModal
 import com.ivy.wallet.ui.theme.modal.LoanModalData
 import com.ivy.wallet.ui.theme.toComposeColor
 import kotlinx.collections.immutable.persistentListOf
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Composable
 fun BoxWithConstraintsScope.LoansScreen(screen: LoansScreen) {
@@ -164,6 +165,7 @@ private fun BoxWithConstraintsScope.UI(
     }
 
     LoanModal(
+        timeZone = state.timeZone,
         accounts = state.accounts,
         onCreateAccount = {
             onEventHandler.invoke(LoanScreenEvent.OnCreateAccount(accountData = it))
@@ -397,13 +399,14 @@ private fun NoLoansEmptyState(
 }
 
 /** For Preview purpose **/
-private val testDateTime = LocalDateTime.of(2023, 4, 20, 0, 35)
+private val testDateTime = Instant.now()
 
 @Preview
 @Composable
 private fun Preview(theme: Theme = Theme.LIGHT) {
     val state = LoanScreenState(
         baseCurrency = "BGN",
+        timeZone = IvyTimeZone.getDeviceDefault(),
         loans = persistentListOf(
             DisplayLoan(
                 loan = Loan(
@@ -456,7 +459,7 @@ private fun Preview(theme: Theme = Theme.LIGHT) {
                 type = LoanType.LEND,
                 dateTime = testDateTime
             ),
-            baseCurrency = "INR"
+            baseCurrency = "INR",
         ),
         reorderModalVisible = false,
         selectedAccount = null,

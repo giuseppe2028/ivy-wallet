@@ -233,13 +233,11 @@ class LoanDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             TestIdlingResource.increment()
 
-            defaultCurrencyCode = ioThread {
-                settingsDao.findFirst().currency
-            }.also {
+            val settings = ioThread { settingsDao.findFirst() }
+            defaultCurrencyCode = settings.currency.also {
                 baseCurrency.value = it
             }
-
-            timeZone.value = ioThread { settingsDao.findFirst().timeZoneId.toIvyTimeZoneOrDefault() }
+            timeZone.value = settings.timeZoneId.toIvyTimeZoneOrDefault()
 
             accounts.value = accountsAct(Unit)
 

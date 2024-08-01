@@ -114,7 +114,7 @@ fun LocalDateTime.formatNicelyWithTime(
         }
 
         today.plusDays(1) -> {
-            stringRes(R.string.tomorrow, this.formatLocal(patternNoWeekDay, zone))
+            stringRes(R.string.tomorrow_date, this.formatLocal(patternNoWeekDay, zone))
         }
 
         else -> {
@@ -327,10 +327,12 @@ fun timeNowLocal(zone: IvyTimeZone): ZonedDateTime = ZonedDateTime.now(zone.zone
 
 fun ZonedDateTime.formatNicely(
     noWeekDay: Boolean = false
-): String = this.toInstant().formatNicely(noWeekDay, this.zone.id.toIvyTimeZoneOrDefault())
+): String = this.toInstant().formatNicely(noWeekDay, timeZone = this.zone.id.toIvyTimeZoneOrDefault())
 
 fun Instant.formatNicely(
     noWeekDay: Boolean = false,
+    includeTime: Boolean = false,
+    includeDate: Boolean = true,
     timeZone: IvyTimeZone
 ): String {
     val targetTime = this.atZone(timeZone.zoneId)
@@ -338,38 +340,43 @@ fun Instant.formatNicely(
     val todayDate = todayTime.toLocalDate()
 
     val isThisYear = todayTime.year == targetTime.year
-    val patternNoWeekDay = "dd MMM"
+    val patternNoWeekDay = if (includeTime) "HH:mm" else ""
+    val patternWithDate = if (includeDate) "dd MMM" else ""
+    val patternNoWeekDayWithDate = if (includeDate && includeTime) "dd MMM HH:mm" else patternWithDate
+    val patternWithYear = if (includeDate) "dd MMM, yyyy" else ""
+    val patternNoWeekDayWithYear = if (includeDate && includeTime) "dd MMM, yyyy HH:mm" else patternWithYear
 
     if (noWeekDay) {
         return if (isThisYear) {
-            targetTime.formatLocal(patternNoWeekDay)
+            targetTime.formatLocal(patternNoWeekDayWithDate)
         } else {
-            targetTime.formatLocal("dd MMM, yyyy")
+            targetTime.formatLocal(patternNoWeekDayWithYear)
         }
     }
 
     return when (targetTime.toLocalDate()) {
         todayDate -> {
-            stringRes(R.string.today_date, targetTime.formatLocal(patternNoWeekDay))
+            stringRes(R.string.today_date, targetTime.formatLocal(patternNoWeekDayWithDate))
         }
 
         todayDate.minusDays(1) -> {
-            stringRes(R.string.yesterday_date, targetTime.formatLocal(patternNoWeekDay))
+            stringRes(R.string.yesterday_date, targetTime.formatLocal(patternNoWeekDayWithDate))
         }
 
         todayDate.plusDays(1) -> {
-            stringRes(R.string.tomorrow_date, targetTime.formatLocal(patternNoWeekDay))
+            stringRes(R.string.tomorrow_date, targetTime.formatLocal(patternNoWeekDayWithDate))
         }
 
         else -> {
             if (isThisYear) {
-                targetTime.formatLocal("EEE, dd MMM")
+                targetTime.formatLocal("EEE, ${patternNoWeekDayWithDate.ifEmpty { patternNoWeekDay }}")
             } else {
-                targetTime.formatLocal("dd MMM, yyyy")
+                targetTime.formatLocal(patternNoWeekDayWithYear)
             }
         }
     }
 }
+
 
 fun Instant.formatLocal(
     pattern: String = "dd MMM yyyy, HH:mm",

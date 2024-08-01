@@ -40,15 +40,11 @@ import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.LoanRecord
 import com.ivy.legacy.domain.data.IvyTimeZone
-import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.legacy.ui.theme.components.DateTimeRow
 import com.ivy.legacy.legacy.ui.theme.modal.ModalNameInput
 import com.ivy.legacy.utils.getDefaultFIATCurrency
 import com.ivy.legacy.utils.onScreenStart
 import com.ivy.legacy.utils.selectEndTextFieldValue
-import com.ivy.legacy.utils.timeNowUTC
-import com.ivy.legacy.utils.toInstant
-import com.ivy.legacy.utils.toLocalDateTimeWithZone
 import com.ivy.ui.R
 import com.ivy.wallet.domain.deprecated.logic.model.CreateAccountData
 import com.ivy.wallet.domain.deprecated.logic.model.CreateLoanRecordData
@@ -81,7 +77,6 @@ data class LoanRecordModalData(
 @Composable
 fun BoxWithConstraintsScope.LoanRecordModal(
     modal: LoanRecordModalData?,
-    modifier: Modifier = Modifier,
     accounts: List<Account> = emptyList(),
     onCreateAccount: (CreateAccountData) -> Unit = {},
     onCreate: (CreateLoanRecordData) -> Unit,
@@ -100,7 +95,7 @@ fun BoxWithConstraintsScope.LoanRecordModal(
         mutableStateOf(modal?.loanRecord?.amount ?: 0.0)
     }
     var dateTime by remember(modal) {
-        mutableStateOf(modal?.loanRecord?.dateTime ?: timeNowUTC().toInstant("UTC".toIvyTimeZoneOrDefault()))
+        mutableStateOf(modal?.loanRecord?.dateTime ?: Instant.now())
     }
     var selectedAcc by remember(modal) {
         mutableStateOf(modal?.selectedAccount)
@@ -210,9 +205,10 @@ fun BoxWithConstraintsScope.LoanRecordModal(
         Spacer(Modifier.height(24.dp))
 
         DateTimeRow(
-            dateTime = dateTime.toLocalDateTimeWithZone(timeZone),
+            dateTime = dateTime,
+            timeZone = timeZone,
             onSetDateTime = {
-                dateTime = it.toInstant(timeZone)
+                dateTime = it
             }
         )
 

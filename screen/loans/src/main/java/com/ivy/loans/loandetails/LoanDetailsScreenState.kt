@@ -9,7 +9,7 @@ import com.ivy.wallet.ui.theme.modal.LoanRecordModalData
 import kotlinx.collections.immutable.ImmutableList
 
 data class LoanDetailsScreenState(
-    val timeZone:IvyTimeZone?,
+    val timeZone:IvyTimeZone,
     val baseCurrency: String,
     val loan: Loan?,
     val displayLoanRecords: ImmutableList<DisplayLoanRecord>,

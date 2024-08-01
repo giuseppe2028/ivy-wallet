@@ -14,6 +14,8 @@ import com.ivy.data.model.LoanType
 import com.ivy.frp.test.TestIdlingResource
 import com.ivy.legacy.datamodel.Account
 import com.ivy.legacy.datamodel.Loan
+import com.ivy.legacy.domain.data.IvyTimeZone
+import com.ivy.legacy.domain.data.IvyTimeZone.Companion.toIvyTimeZoneOrDefault
 import com.ivy.legacy.domain.deprecated.logic.AccountCreator
 import com.ivy.legacy.utils.format
 import com.ivy.legacy.utils.getDefaultFIATCurrency
@@ -51,6 +53,7 @@ class LoanViewModel @Inject constructor(
 ) : ComposeViewModel<LoanScreenState, LoanScreenEvent>() {
 
     private val baseCurrencyCode = mutableStateOf(getDefaultFIATCurrency().currencyCode)
+    private val timeZone = mutableStateOf(IvyTimeZone.getDeviceDefault())
     private val loans = mutableStateOf<ImmutableList<DisplayLoan>>(persistentListOf())
     private val accounts = mutableStateOf<ImmutableList<Account>>(persistentListOf())
     private val selectedAccount = mutableStateOf<Account?>(null)
@@ -74,6 +77,7 @@ class LoanViewModel @Inject constructor(
 
         return LoanScreenState(
             baseCurrency = getBaseCurrencyCode(),
+            timeZone = getTimeZone(),
             loans = getLoans(),
             accounts = getAccounts(),
             selectedAccount = getSelectedAccount(),
@@ -99,6 +103,11 @@ class LoanViewModel @Inject constructor(
     @Composable
     private fun getBaseCurrencyCode(): String {
         return baseCurrencyCode.value
+    }
+
+    @Composable
+    private fun getTimeZone(): IvyTimeZone {
+        return timeZone.value
     }
 
     @Composable
@@ -150,11 +159,11 @@ class LoanViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Default) {
             TestIdlingResource.increment()
 
-            defaultCurrencyCode = ioThread {
-                settingsDao.findFirst().currency
-            }.also {
+            val settings = ioThread { settingsDao.findFirst() }
+            defaultCurrencyCode = settings.currency.also {
                 baseCurrencyCode.value = it
             }
+            timeZone.value = settings.timeZoneId.toIvyTimeZoneOrDefault()
 
             initialiseAccounts()
 
